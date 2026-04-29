@@ -1,0 +1,62 @@
+@model SASMS.Models.GovernmentFee
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["AddNewFee"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="dashboard-header-modern">
+    <div class="stat-info">
+        <h3>@Localizer["AddNewFee"]</h3>
+        <p>@Localizer["DefineNewGovernmentFee"]</p>
+    </div>
+    <a href="@Url.Action("Index")" class="form-btn" style="text-decoration: none; background: var(--bg-surface); color: var(--text-dark); border: 1px solid #E5E7EB;">
+        <i class="fas fa-arrow-left"></i> @Localizer["BackToList"]
+    </a>
+</div>
+
+<div class="form-section" style="max-width: 700px; margin: 20px auto;">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="All" class="text-danger" style="margin-bottom: 20px; font-weight: 600; font-size: 14px; background: rgba(231, 76, 60, 0.05); padding: 15px; border-radius: 12px; border-left: 4px solid #e74c3c;"></div>
+        
+        <div style="margin-bottom: 25px;">
+            <label class="stat-label" style="display: block; margin-bottom: 8px;">@Localizer["FeeName"]</label>
+            <input asp-for="Name" class="form-input" placeholder="e.g. Govt Annual Fee" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+            <div>
+                <label class="stat-label" style="display: block; margin-bottom: 8px;">@Localizer["Amount"] (EGP)</label>
+                <input asp-for="Amount" type="number" step="0.01" class="form-input" placeholder="220.00" required />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div>
+                <label class="stat-label" style="display: block; margin-bottom: 8px;">@Localizer["AcademicYear"]</label>
+                <select asp-for="AcademicYearId" class="form-input" required>
+                    <option value="">@Localizer["SelectAcademicYear"]</option>
+                    @foreach (var year in (IEnumerable<SASMS.Models.AcademicYear>)ViewBag.AcademicYears)
+                    {
+                        <option value="@year.Id">@year.Year</option>
+                    }
+                </select>
+                <span asp-validation-for="AcademicYearId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <label class="stat-label" style="display: block; margin-bottom: 8px;">@Localizer["Description"]</label>
+            <textarea asp-for="Description" class="form-input" rows="4" style="resize: vertical;"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div style="text-align: right;">
+            <button type="submit" class="form-btn" style="padding: 14px 40px;">
+                <i class="fas fa-save"></i> @Localizer["SaveFee"]
+            </button>
+        </div>
+    </form>
+</div>

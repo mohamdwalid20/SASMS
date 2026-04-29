@@ -1,0 +1,128 @@
+@using SASMS.Services
+@inject IBreadcrumbService BreadcrumbService
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@if (BreadcrumbService.GetBreadcrumbs().Any())
+{
+    <nav aria-label="breadcrumb" class="professional-breadcrumb">
+        <ol class="breadcrumb-list">
+            @foreach (var item in BreadcrumbService.GetBreadcrumbs())
+            {
+                <li class="breadcrumb-item @(item.IsActive ? "active" : "")">
+                    @if (item.IsActive)
+                    {
+                        <span class="breadcrumb-link disabled">@item.Title</span>
+                    }
+                    else
+                    {
+                        <a href="@item.Url" class="breadcrumb-link">
+                            @if (item.Title == "Dashboard" || item.Title == Localizer["Dashboard"])
+                            {
+                                <i class="fas fa-home home-icon"></i>
+                            }
+                            <span>@item.Title</span>
+                        </a>
+                        <span class="breadcrumb-separator">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    }
+                </li>
+            }
+        </ol>
+    </nav>
+
+    <style>
+        .professional-breadcrumb {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 10px 30px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .breadcrumb-list {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 0;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .breadcrumb-link {
+            color: #6C757D;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .breadcrumb-link:not(.disabled):hover {
+            color: var(--primary);
+            background: rgba(77, 68, 181, 0.05);
+        }
+
+        .breadcrumb-link.disabled {
+            color: var(--primary);
+            font-weight: 700;
+            cursor: default;
+        }
+
+        .home-icon {
+            font-size: 14px;
+            margin-right: 6px;
+        }
+
+        html[dir="rtl"] .home-icon {
+            margin-right: 0;
+            margin-left: 6px;
+        }
+
+        .breadcrumb-separator {
+            color: #A098AE;
+            font-size: 10px;
+            margin: 0 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        html[dir="rtl"] .breadcrumb-separator i {
+            transform: rotate(180deg);
+        }
+
+        /* Dark Mode */
+        body.dark-mode .professional-breadcrumb {
+            background: rgba(30, 30, 45, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        body.dark-mode .breadcrumb-link {
+            color: #A0A0B0;
+        }
+
+        body.dark-mode .breadcrumb-link:not(.disabled):hover {
+            color: #C5B0F5;
+            background: rgba(197, 176, 245, 0.1);
+        }
+
+        body.dark-mode .breadcrumb-link.disabled {
+            color: #38F9D7;
+        }
+
+        body.dark-mode .breadcrumb-separator {
+            color: #606070;
+        }
+    </style>
+}
+

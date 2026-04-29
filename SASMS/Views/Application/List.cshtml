@@ -1,0 +1,177 @@
+@model IEnumerable<SASMS.ViewModels.ApplicationViewModel>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Admissions"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["Applications"]</h3>
+        
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div id="bulkActions" style="display: none;">
+                <form asp-action="BulkDelete" method="post" id="bulkDeleteForm">
+                    <button type="submit" class="btn btn-danger" style="background-color: #FF5252; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;" onclick="confirmAction(event, this, '@Localizer["ConfirmDeleteSelected"]', '@Localizer["DeleteWarning"]', 'warning', '@Localizer["YesDelete"]');">
+                        <i class="fas fa-trash-alt"></i> @Localizer["DeleteSelected"]
+                    </button>
+                </form>
+            </div>
+
+            <div class="filter-bar">
+                <form method="get" style="display: flex; align-items: center; gap: 10px;">
+                    <select name="status" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 8px; outline: none; font-size: 13px; color: var(--text-dark);">
+                        <option value="">@Localizer["AllStatus"]</option>
+                        <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">@Localizer["Pending"]</option>
+                        <option value="Approved" selected="@(ViewBag.StatusFilter == "Approved")">@Localizer["Approved"]</option>
+                        <option value="Rejected" selected="@(ViewBag.StatusFilter == "Rejected")">@Localizer["Rejected"]</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 24px;">
+        <div class="metric-card" style="background: #FFFDF5; border: 1px solid #FFF8E1;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["PendingReview"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FCC43E;">@ViewBag.PendingCount</div>
+        </div>
+        <div class="metric-card" style="background: #F8F9FF; border: 1px solid #E8F0FE;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Approved"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1A73E8;">@ViewBag.ApprovedCount</div>
+        </div>
+        <div class="metric-card" style="background: #FFF8F8; border: 1px solid #FFEBEB;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Rejected"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FF5252;">@ViewBag.RejectedCount</div>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                <th>@Localizer["AppNumber"]</th>
+                <th>@Localizer["Applicant"]</th>
+                <th>@Localizer["Grade"]</th>
+                <th>@Localizer["PreferredDept"]</th>
+                <th>@Localizer["Score"]</th>
+                <th>@Localizer["Eligibility"]</th>
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["Submitted"]</th>
+                <th>@Localizer["Action"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td><input type="checkbox" name="ids" value="@item.Id" class="select-item"></td>
+                    <td style="font-weight: 600; color: var(--primary);">@item.ApplicationNumber</td>
+                    <td>
+                        <div style="font-weight: 500;">@item.ApplicantName</div>
+                        <div style="font-size: 11px; color: var(--text-gray);">@item.ApplicantEmail</div>
+                    </td>
+                    <td>@item.Grade</td>
+                    <td>@item.PreferredDepartment</td>
+                    <td>@item.TotalScore</td>
+                    <td>
+                        @if (item.IsEligible)
+                        {
+                            <span style="color: #4CAF50; font-weight: 600;"><i class="fas fa-check"></i> @Localizer["Eligible"]</span>
+                        }
+                        else
+                        {
+                            <span style="color: #FF5252; font-weight: 600;"><i class="fas fa-times"></i> @Localizer["NotEligible"]</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.Status == "Approved")
+                        {
+                            <span class="status-badge st-paid"><span class="dot"></span> @Localizer["Approved"]</span>
+                        }
+                        else if (item.Status == "Rejected")
+                        {
+                            <span class="status-badge st-overdue"><span class="dot"></span> @Localizer["Rejected"]</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge st-pending"><span class="dot"></span> @item.Status</span>
+                        }
+                    </td>
+                    <td>@item.ApplicationDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="@Url.Action("Details", "Application", new { id = item.Id })" class="action-btn"><i class="far fa-eye"></i></a>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" 
+                                      onsubmit="confirmAction(event, this)"
+                                      data-confirm-title="@Localizer["AreYouSure"]"
+                                      data-confirm-text="@Localizer["DeleteApplicationConfirm"]"
+                                      data-confirm-icon="warning"
+                                      data-confirm-yes="@Localizer["YesDelete"]"
+                                      style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="action-btn delete-btn" title="@Localizer["Delete"]">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoApplicationsFound"]</div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            const selectAll = $('#selectAll');
+            const selectItems = $('.select-item');
+            const bulkActions = $('#bulkActions');
+            const bulkDeleteForm = $('#bulkDeleteForm');
+
+            function updateBulkActions() {
+                const checkedCount = $('.select-item:checked').length;
+                if (checkedCount > 0) {
+                    bulkActions.fadeIn(200);
+                } else {
+                    bulkActions.fadeOut(200);
+                }
+            }
+
+            selectAll.change(function() {
+                selectItems.prop('checked', $(this).prop('checked'));
+                updateBulkActions();
+            });
+
+            selectItems.change(function() {
+                updateBulkActions();
+                if (!$(this).prop('checked')) {
+                    selectAll.prop('checked', false);
+                } else if ($('.select-item:checked').length === selectItems.length) {
+                    selectAll.prop('checked', true);
+                }
+            });
+
+            $('#bulkDeleteForm').on('submit', function(e) {
+                // Remove existing hidden inputs to avoid duplicates
+                $(this).find('input[name="ids"]').remove();
+                
+                // Add checked IDs to form
+                $('.select-item:checked').each(function() {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'ids',
+                        value: $(this).val()
+                    }).appendTo('#bulkDeleteForm');
+                });
+            });
+        });
+    </script>
+}

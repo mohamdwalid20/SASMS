@@ -1,0 +1,112 @@
+@model IEnumerable<SASMS.ViewModels.PaymentViewModel>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["FeesCollection"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["FeesCollection"]</h3>
+        
+        <div class="filter-bar">
+            <form method="get" style="display: flex; align-items: center; gap: 16px;">
+                <div class="search-filter">
+                    <i class="fas fa-search" style="color: #A098AE;"></i>
+                    <input type="text" name="search" value="@ViewBag.Search" placeholder="@Localizer["SearchPlaceholder"]">
+                </div>
+                
+                <select name="status" onchange="this.form.submit()" class="dropdown-btn" style="border-radius: 8px;">
+                    <option value="">@Localizer["All Status"]</option>
+                    <option value="Completed" selected="@(ViewBag.StatusFilter == "Completed")">@Localizer["Completed"]</option>
+                    <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">@Localizer["Pending"]</option>
+                    <option value="Overdue" selected="@(ViewBag.StatusFilter == "Overdue")">@Localizer["Overdue"]</option>
+                </select>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Statistics Cards (Optional, based on Controller ViewBag) -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 24px;">
+        <div class="metric-card" style="background: #F8F9FF; border: 1px solid #E8F0FE;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["TotalCollected"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--primary);">@(((decimal)ViewBag.TotalCollected).ToString("C"))</div>
+        </div>
+        <div class="metric-card" style="background: #FFF8F8; border: 1px solid #FFEBEB;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Outstanding"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FF5252;">@(((decimal)ViewBag.TotalOutstanding).ToString("C"))</div>
+        </div>
+        <div class="metric-card" style="background: #FFFDF5; border: 1px solid #FFF8E1;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["PendingPayments"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FCC43E;">@ViewBag.PendingCount</div>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></th>
+                <th>ID</th>
+                <th>@Localizer["Student"]</th>
+                <th>@Localizer["Class"]</th>
+                <th>@Localizer["FeeType"]</th>
+                <th>@Localizer["Amount"]</th>
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["Date"]</th>
+                <th>@Localizer["Action"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                    <td style="font-weight: 600; color: var(--primary);">@item.PaymentNumber</td>
+                    <td class="user-cell">
+                        <img src="@(string.IsNullOrEmpty(item.StudentProfilePicture) ? "https://i.pravatar.cc/150?u=" + item.StudentId : item.StudentProfilePicture)" alt="Avatar">
+                        <div class="user-meta">
+                            <div>@item.StudentName</div>
+                            <div style="font-size: 11px;">@item.StudentId</div>
+                        </div>
+                    </td>
+                    <td>@item.ClassName</td>
+                    <td>@item.FeeName</td>
+                    <td>
+                        <div style="font-weight: 600;">@item.PaidAmount.ToString("C")</div>
+                        <div style="font-size: 11px; color: var(--text-gray);">of @item.TotalAmount.ToString("C")</div>
+                    </td>
+                    <td>
+                        @if (item.Status == "Completed")
+                        {
+                            <span class="status-badge st-paid"><span class="dot"></span> @Localizer["Paid"]</span>
+                        }
+                        else if (item.Status == "Pending")
+                        {
+                            <span class="status-badge st-pending"><span class="dot"></span> Pending</span>
+                        }
+                        else if (item.Status == "Late" || item.Status == "Overdue")
+                        {
+                            <span class="status-badge st-overdue"><span class="dot"></span> Overdue</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge" style="background: #F0F0F0; color: #666;">@item.Status</span>
+                        }
+                    </td>
+                    <td>@(item.PaymentDate.HasValue ? item.PaymentDate.Value.ToString("MMM dd, yyyy") : "-")</td>
+                    <td>
+                        <button class="action-btn"><i class="fas fa-print"></i></button>
+                        <button class="action-btn"><i class="fas fa-ellipsis-h"></i></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoPaymentRecords"]</div>
+    }
+</div>

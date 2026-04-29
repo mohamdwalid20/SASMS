@@ -1,0 +1,383 @@
+@model SASMS.ViewModels.AttendanceViewModel
+@using SASMS.Helpers
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Attendance"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .attendance-sheet-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-top: 24px;
+    }
+
+    .sheet-header {
+        padding: 24px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .sheet-title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .btn-back-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9ff;
+        color: var(--text-gray);
+        transition: 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-back-circle:hover {
+        background: var(--primary-light);
+        color: var(--primary);
+        transform: translateX(-3px);
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .attendance-table th {
+        background: #fcfcfd;
+        padding: 16px 24px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-gray);
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .attendance-table td {
+        padding: 16px 24px;
+        border-bottom: 1px solid #f9f9f9;
+        vertical-align: middle;
+    }
+
+    .attendance-table tr:hover {
+        background: #fcfcff;
+    }
+
+    .status-select-modern {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid #e1e4e8;
+        font-size: 14px;
+        min-width: 130px;
+        background: #fff;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .status-select-modern:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(77, 68, 181, 0.1);
+    }
+
+    .notes-input-modern {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid #e1e4e8;
+        font-size: 14px;
+        width: 100%;
+        transition: 0.2s;
+    }
+
+    .notes-input-modern:focus {
+        border-color: var(--primary);
+        outline: none;
+    }
+
+    .btn-save-mini {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-save-mini:hover {
+        background: #3d35a0;
+        transform: scale(1.05);
+    }
+
+    .bulk-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-bulk-save {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: #2ecc71;
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-bulk-save:hover {
+        background: #27ae60;
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+    }
+
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .summary-card {
+        background: white;
+        padding: 24px;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .summary-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+</style>
+
+<div class="attendance-container" style="padding: 24px;">
+    <div class="stats-summary">
+        <div class="summary-card">
+            <div class="summary-icon" style="background: rgba(77, 68, 181, 0.1); color: var(--primary);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-gray);">@Localizer["AttendanceRate"]</div>
+                <div style="font-size: 20px; font-weight: 700;">@Model.AttendanceRate.ToString("F1")%</div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-gray);">@Localizer["Present"]</div>
+                <div style="font-size: 20px; font-weight: 700;">@Model.PresentToday</div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c;">
+                <i class="fas fa-user-times"></i>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-gray);">@Localizer["Absent"]</div>
+                <div style="font-size: 20px; font-weight: 700;">@Model.AbsentToday</div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon" style="background: rgba(241, 196, 15, 0.1); color: #f1c40f;">
+                <i class="fas fa-user-clock"></i>
+            </div>
+            <div>
+                <div style="font-size: 13px; color: var(--text-gray);">@Localizer["Late"]</div>
+                <div style="font-size: 20px; font-weight: 700;">@Model.LateToday</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="attendance-sheet-card">
+        <div class="sheet-header">
+            <div class="sheet-title-group">
+                <a href="@Url.Action("Index", "Attendance")" class="btn-back-circle">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h3 style="margin: 0; font-size: 20px; font-weight: 700;">@Localizer["AttendanceSheet"]</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-gray);">@Localizer["Class"]: @(ViewBag.SelectedClass ?? "All") | @Model.SelectedDate.ToString("MMMM dd, yyyy")</p>
+                </div>
+            </div>
+
+            <div class="bulk-actions">
+                <form method="get" id="dateFilterForm" style="display: flex; gap: 10px;">
+                    <input type="date" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" onchange="this.form.submit()" class="status-select-modern" style="padding: 11px 14px;">
+                    <input type="hidden" name="className" value="@ViewBag.SelectedClass" />
+                </form>
+                <button class="btn-bulk-save" onclick="saveAllAttendance()">
+                    <i class="fas fa-save"></i> @Localizer["SaveAllRecords"]
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th style="padding-left: 32px;">@Localizer["StudentInfo"]</th>
+                        <th>@Localizer["CheckIn"]</th>
+                        <th>@Localizer["Status"]</th>
+                        <th>@Localizer["Notes"]</th>
+                        <th style="text-align: center; padding-right: 32px;">@Localizer["Action"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Records)
+                    {
+                        <tr class="attendance-row" data-student-id="@item.DatabaseStudentId">
+                            <td style="padding-left: 32px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="@AvatarHelper.GetAvatarUrl(item.StudentName, item.ProfilePicturePath)" style="width: 45px; height: 45px; border-radius: 12px; object-fit: cover;">
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-dark);">@item.StudentName</div>
+                                        <div style="font-size: 12px; color: var(--text-gray);">ID: @item.StudentId</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: var(--text-gray); font-size: 14px;">@(item.CheckInTime == "N/A" ? "--:--" : item.CheckInTime)</td>
+                            <td>
+                                <select class="status-select-modern">
+                                    <option value="Present" selected="@(item.Status == "Present")">@Localizer["Present"]</option>
+                                    <option value="Absent" selected="@(item.Status == "Absent")">@Localizer["Absent"]</option>
+                                    <option value="Late" selected="@(item.Status == "Late")">@Localizer["Late"]</option>
+                                    <option value="Excused" selected="@(item.Status == "Excused")">@Localizer["Excused"]</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="notes-input-modern" value="@item.Notes" placeholder="@Localizer["AddRemarks"]...">
+                            </td>
+                            <td style="text-align: center; padding-right: 32px;">
+                                <button class="btn-save-mini" onclick="saveAttendance(this)">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Records.Any())
+        {
+            <div style="padding: 100px; text-align: center; color: var(--text-gray);">
+                <i class="fas fa-users-slash" style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;"></i>
+                <p>@Localizer["NoStudentsFoundForClass"]</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    async function saveAttendance(btn) {
+        const row = btn.closest('tr');
+        const studentId = row.dataset.studentId;
+        const status = row.querySelector('.status-select-modern').value;
+        const notes = row.querySelector('.notes-input-modern').value;
+        const date = '@Model.SelectedDate.ToString("yyyy-MM-dd")';
+
+        btn.disabled = true;
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        try {
+            const success = await performUpdate(studentId, date, status, notes);
+            if (success) {
+                row.style.background = '#f0fff4';
+                setTimeout(() => { row.style.background = ''; }, 2000);
+            } else {
+                Swal.fire('Error', 'Failed to update record', 'error');
+            }
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
+    }
+
+    async function saveAllAttendance() {
+        const rows = document.querySelectorAll('.attendance-row');
+        const total = rows.length;
+        if (total === 0) return;
+
+        let count = 0;
+
+        Swal.fire({
+            title: '@Localizer["SavingAll"]',
+            html: `Progress: <b>0</b>/${total}`,
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        for (const row of rows) {
+            const studentId = row.dataset.studentId;
+            const status = row.querySelector('.status-select-modern').value;
+            const notes = row.querySelector('.notes-input-modern').value;
+            const date = '@Model.SelectedDate.ToString("yyyy-MM-dd")';
+
+            const success = await performUpdate(studentId, date, status, notes);
+            if (success) count++;
+            
+            Swal.getHtmlContainer().querySelector('b').textContent = count;
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: '@Localizer["Done"]',
+            text: `${count} records saved successfully.`
+        });
+    }
+
+    async function performUpdate(studentId, date, status, notes) {
+        try {
+            const response = await fetch('/Attendance/UpdateAttendance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `studentId=${studentId}&date=${date}&status=${status}&notes=${encodeURIComponent(notes)}`
+            });
+
+            const result = await response.json();
+            return result.success;
+        } catch (error) {
+            console.error('Error:', error);
+            return false;
+        }
+    }
+</script>
+
+@Html.AntiForgeryToken()

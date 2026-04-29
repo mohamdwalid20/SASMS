@@ -1,0 +1,200 @@
+@model IEnumerable<SASMS.ViewModels.SuggestionViewModel>
+@using Microsoft.Extensions.Localization
+@using SASMS.Helpers
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Suggestions"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["Suggestions"]</h3>
+        
+        <div class="filter-bar">
+            <form method="get" style="display: flex; align-items: center; gap: 10px;">
+                <select name="category" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 8px; outline: none; font-size: 13px; color: var(--text-dark);">
+                    <option value="">@Localizer["AllCategories"]</option>
+                    <option value="Academic" selected="@(ViewBag.CategoryFilter == "Academic")">@Localizer["Academic"]</option>
+                    <option value="Administrative" selected="@(ViewBag.CategoryFilter == "Administrative")">@Localizer["Administrative"]</option>
+                    <option value="Facilities" selected="@(ViewBag.CategoryFilter == "Facilities")">@Localizer["Facilities"]</option>
+                    <option value="Services" selected="@(ViewBag.CategoryFilter == "Services")">@Localizer["Services"]</option>
+                    <option value="Activities" selected="@(ViewBag.CategoryFilter == "Activities")">@Localizer["Activities"]</option>
+                    <option value="Other" selected="@(ViewBag.CategoryFilter == "Other")">@Localizer["Other"]</option>
+                </select>
+                <select name="status" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 8px; outline: none; font-size: 13px; color: var(--text-dark);">
+                    <option value="">@Localizer["AllStatus"]</option>
+                    <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">@Localizer["Pending"]</option>
+                    <option value="UnderReview" selected="@(ViewBag.StatusFilter == "UnderReview")">@Localizer["UnderReview"]</option>
+                    <option value="Approved" selected="@(ViewBag.StatusFilter == "Approved")">@Localizer["Approved"]</option>
+                    <option value="Implemented" selected="@(ViewBag.StatusFilter == "Implemented")">@Localizer["Implemented"]</option>
+                    <option value="Rejected" selected="@(ViewBag.StatusFilter == "Rejected")">@Localizer["Rejected"]</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 24px;">
+        <div class="metric-card" style="background: #FFFDF5; border: 1px solid #FFF8E1;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Pending"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FCC43E;">@ViewBag.PendingCount</div>
+        </div>
+        <div class="metric-card" style="background: #E8F0FE; border: 1px solid #D2E3FC;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["UnderReview"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1A73E8;">@ViewBag.UnderReviewCount</div>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">@Localizer["Title"]</th>
+                <th style="width: 15%;">@Localizer["Category"]</th>
+                <th style="width: 20%;">@Localizer["SubmittedBy"]</th>
+                <th style="width: 15%;">@Localizer["Date"]</th>
+                <th style="width: 15%;">@Localizer["Status"]</th>
+                <th style="width: 10%;">@Localizer["Action"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td style="font-weight: 600;">@item.Title</td>
+                    <td>
+                        <span style="background: #F0F0F0; padding: 4px 8px; border-radius: 4px; font-size: 11px;">@item.Category</span>
+                    </td>
+                    <td class="user-cell">
+                        @if(!item.IsAnonymous) {
+                            @if (!string.IsNullOrEmpty(item.StudentProfilePicture)) {
+                                <img src="@AvatarHelper.GetAvatarUrl(item.StudentName, item.StudentProfilePicture)" alt="Avatar">
+                            } else {
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #EEE; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #888;">@item.StudentName.Substring(0,1)</div>
+                            }
+                            <div class="user-meta">
+                                <div>@item.StudentName</div>
+                            </div>
+                        } else {
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background: #EEE; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #888;"><i class="fas fa-user-secret"></i></div>
+                            <div class="user-meta">
+                                <div>@Localizer["Anonymous"]</div>
+                            </div>
+                        }
+                    </td>
+                    <td>@item.SuggestionDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                         @if (item.Status == "Approved" || item.Status == "Implemented")
+                        {
+                            <span class="status-badge st-paid"><span class="dot"></span> @item.Status</span>
+                        }
+                        else if (item.Status == "Pending")
+                        {
+                            <span class="status-badge st-pending"><span class="dot"></span>@Localizer["Pending"]</span>
+                        }
+                         else if (item.Status == "UnderReview")
+                        {
+                            <span class="status-badge st-paid" style="color: #1A73E8; background: #E8F0FE;"><span class="dot" style="background: #1A73E8;"></span>@Localizer["UnderReview"]</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge st-overdue"><span class="dot"></span> @item.Status</span>
+                        }
+                    </td>
+                    <td>
+                        <button type="button" class="action-btn" onclick="openReviewModal(@item.Id, '@item.Status', '@(Html.Raw(JavaScriptEncoder.Default.Encode(item.ReviewNotes ?? "")))')" title="@Localizer["Review"]">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="action-btn" onclick="deleteSuggestion(@item.Id)" style="color: #D93025; background: none; border: none; cursor: pointer;" title="@Localizer["Delete"]">
+                            <i class="far fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoDataFound"]</div>
+    }
+</div>
+
+<!-- Review Modal -->
+<div id="reviewModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div class="content-card" style="width: 90%; max-width: 500px; margin: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 class="card-title" style="margin:0;">@Localizer["ReviewSuggestion"]</h3>
+            <button onclick="closeReviewModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-gray);">&times;</button>
+        </div>
+        <form id="reviewForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="review-id" name="id">
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Status"]</label>
+                <select id="review-status" name="status" class="form-input" required>
+                    <option value="Pending">@Localizer["Pending"]</option>
+                    <option value="UnderReview">@Localizer["UnderReview"]</option>
+                    <option value="Approved">@Localizer["Approved"]</option>
+                    <option value="Implemented">@Localizer["Implemented"]</option>
+                    <option value="Rejected">@Localizer["Rejected"]</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Notes"]</label>
+                <textarea id="review-notes" name="notes" class="form-input" rows="4" placeholder="@Localizer["ReviewNotesPlaceholder"]"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeReviewModal()" class="form-btn" style="background:#eee; color:#333;">@Localizer["Cancel"]</button>
+                <button type="button" onclick="saveReview()" class="form-btn">@Localizer["Save"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@using System.Text.Encodings.Web
+<script>
+    function openReviewModal(id, status, notes) {
+        document.getElementById('review-id').value = id;
+        document.getElementById('review-status').value = status;
+        document.getElementById('review-notes').value = notes;
+        document.getElementById('reviewModal').style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+        document.getElementById('reviewModal').style.display = 'none';
+    }
+
+    function saveReview() {
+        const formData = $('#reviewForm').serialize();
+        $.post('/Suggestion/UpdateStatus', formData, function(response) {
+            if (response.success) {
+                Swal.fire('@Localizer["Success"]', response.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', response.message, 'error');
+            }
+        });
+    }
+
+    function deleteSuggestion(id) {
+        Swal.fire({
+            title: '@Localizer["AreYouSure"]',
+            text: '@Localizer["DeleteSuggestionWarning"]',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '@Localizer["Delete"]',
+            cancelButtonText: '@Localizer["Cancel"]'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/Suggestion/Delete/' + id, { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() }, function(response) {
+                    if (response.success) {
+                        Swal.fire('@Localizer["Deleted"]', response.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>

@@ -1,0 +1,643 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+          content="Eva International Applied Technology School - Preparing future technology leaders.">
+    <title>Eva International Applied Technology School</title>
+
+    <!-- Brand Fonts - Visual Identity -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="images/logo%20remove.png" type="image/png">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <img src="images/logo.png" alt="Eva ATS Logo">
+            </a>
+            <nav class="navbar">
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#specializations">Specializations</a></li>
+                    <li><a href="#admission">Admission</a></li>
+                    <li><a href="#requirements">Requirements</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        @if(User.IsInRole("Student")) {
+                             <li><a href="/StudentPortal" class="btn-contact">Dashboard</a></li>
+                        } else if(User.IsInRole("Admin") || User.IsInRole("StudentAffairs")) {
+                             <li><a href="/Admin" class="btn-contact">Dashboard</a></li>
+                        } else {
+                             <li><a href="/Account/Logout" class="btn-contact">Logout</a></li>
+                        }
+                    }
+                    else
+                    {
+                        <li><a href="/Account/Login" class="btn-contact">Login</a></li>
+                    }
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-slideshow">
+            <div class="slide active" style="background-image: url('images/Eva/Main.jpg');"></div>
+            <div class="slide" style="background-image: url('images/Eva/SD.jpg');"></div>
+            <div class="slide" style="background-image: url('images/Eva/OM.jpg');"></div>
+            <div class="slide" style="background-image: url('images/Eva/Event.jpg');"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>Eva International Applied Technology School</h1>
+                <h2>Shaping Tomorrow's Technology Leaders</h2>
+                <p>
+                    A premier institution in the International Applied Technology Schools Network, delivering world-class
+                    technical education in 6th of October City
+                </p>
+                <div class="hero-btns">
+                    <a href="#specializations" class="btn btn-primary">Explore Programs</a>
+                    <a href="/Applicant/Apply" class="btn btn-outline">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about section-padding" id="about">
+        <div class="container">
+            <div class="section-title">
+                <h2>Excellence in Applied Technology Education</h2>
+                <p>
+                    Bridging the gap between academic learning and industry demands through innovative, hands-on
+                    technical training
+                </p>
+            </div>
+            <div class="about-cards">
+                <div class="card">
+                    <i class="fas fa-building"></i>
+                    <h3>Our Institution</h3>
+                    <p>
+                        A state-of-the-art campus in 6th of October City, pioneering applied technology education with
+                        industry-standard facilities and expert faculty.
+                    </p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Our Curriculum</h3>
+                    <p>
+                        Comprehensive 3-year competency-based programs combining theoretical knowledge with practical,
+                        industry-aligned technical training.
+                    </p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-bullseye"></i>
+                    <h3>Our Vision</h3>
+                    <p>
+                        Empowering students with cutting-edge technical skills and professional competencies to excel in
+                        Egypt's evolving technology landscape.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specializations Section -->
+    <section class="specializations section-padding" id="specializations">
+        <div class="container">
+            <div class="section-title">
+                <h2>Academic Programs</h2>
+                <p>Industry-aligned specializations designed to prepare students for high-demand technical careers</p>
+            </div>
+            <div class="spec-grid">
+                <!-- Software Dev -->
+                <div class="spec-card">
+                    <img src="images/Eva/SD.jpg" alt="Software Development">
+                    <div class="spec-content">
+                        <h3>Software Development</h3>
+                        <p>
+                            Master modern programming technologies and software engineering principles through
+                            comprehensive, industry-standard training programs.
+                        </p>
+
+                        <div class="spec-features">
+                            <h4>Year 2 Specializations:</h4>
+                            <ul>
+                                <li>Information Systems</li>
+                                <li>Software Developer</li>
+                            </ul>
+
+                            <h4>Career Opportunities:</h4>
+                            <ul>
+                                <li>Software Developer</li>
+                                <li>Web Developer</li>
+                                <li>UI/UX Designer</li>
+                                <li>Embedded Systems Developer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operational Maintenance -->
+                <div class="spec-card">
+                    <img src="images/Eva/OM%203.jpg" alt="Operational Maintenance">
+                    <div class="spec-content">
+                        <h3>Operational Maintenance</h3>
+                        <p>
+                            Gain specialized expertise in the operation and maintenance of advanced pharmaceutical and
+                            food industry equipment and systems.
+                        </p>
+
+                        <div class="spec-features">
+                            <h4>Year 3 Specializations:</h4>
+                            <ul>
+                                <li>H VAC</li>
+                                <li>Maintenance & Operation</li>
+                            </ul>
+
+                            <h4>Career Opportunities:</h4>
+                            <ul>
+                                <li>Pharmaceutical Plants</li>
+                                <li>Food Production Facilities</li>
+                                <li>Cosmetics Manufacturing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subjects Section -->
+    <section class="section-padding" id="curriculum">
+        <div class="container">
+            <div class="section-title">
+                <h2>Comprehensive Curriculum</h2>
+                <p>Balanced academic foundation and specialized technical training across all programs</p>
+            </div>
+
+            <div class="curriculum-tabs">
+                <button class="tab-btn active" data-tab="general">Academic Subjects</button>
+                <button class="tab-btn" data-tab="software">Software Track</button>
+                <button class="tab-btn" data-tab="maintenance">Maintenance Track</button>
+                <button class="tab-btn" data-tab="activities">Activities</button>
+            </div>
+
+            <!-- Tab: General -->
+            <div class="tab-content active" id="general">
+                <div class="subject-list">
+                    <div class="subject-item">
+                        <i class="fas fa-language"></i>
+                        <div>
+                            <h4>Arabic</h4>
+                            <p>Language and literature studies</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-pray"></i>
+                        <div>
+                            <h4>Religion</h4>
+                            <p>Religious and ethical studies</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-flag"></i>
+                        <div>
+                            <h4>National Education</h4>
+                            <p>Civics and national studies</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-square-root-alt"></i>
+                        <div>
+                            <h4>Mathematics</h4>
+                            <p>Applied mathematics</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-atom"></i>
+                        <div>
+                            <h4>Physics</h4>
+                            <p>Fundamental physics principles</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-globe"></i>
+                        <div>
+                            <h4>English</h4>
+                            <p>Technical English communication</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Software -->
+            <div class="tab-content" id="software">
+                <div class="subject-list">
+                    <div class="subject-item">
+                        <i class="fas fa-code"></i>
+                        <div>
+                            <h4>Programming Fundamentals</h4>
+                            <p>Core programming concepts</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <div>
+                            <h4>Web Development</h4>
+                            <p>Front-end and back-end technologies</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <h4>Mobile Development</h4>
+                            <p>Building mobile applications</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-database"></i>
+                        <div>
+                            <h4>Database Systems</h4>
+                            <p>Design and implementation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Maintenance -->
+            <div class="tab-content" id="maintenance">
+                <div class="subject-list">
+                    <div class="subject-item">
+                        <i class="fas fa-flask"></i>
+                        <div>
+                            <h4>Chemistry</h4>
+                            <p>Industrial chemistry applications</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-cogs"></i>
+                        <div>
+                            <h4>Mechanical Systems</h4>
+                            <p>Equipment maintenance</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-bolt"></i>
+                        <div>
+                            <h4>Electrical Systems</h4>
+                            <p>Industrial electrical maintenance</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fas fa-industry"></i>
+                        <div>
+                            <h4>Industrial Processes</h4>
+                            <p>Pharmaceutical and food production</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Activities -->
+            <div class="tab-content" id="activities">
+                <div class="subject-list">
+                    <div class="subject-item">
+                        <i class="fa-solid fa-music"></i>
+                        <div>
+                            <h4>Music</h4>
+                            <p>Musical instruments and theory</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fa-solid fa-masks-theater"></i>
+                        <div>
+                            <h4>Drama</h4>
+                            <p>Acting, visual and motor communication</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fa-solid fa-palette"></i>
+                        <div>
+                            <h4>Art</h4>
+                            <p>Clay arts, drawing and potential</p>
+                        </div>
+                    </div>
+                    <div class="subject-item">
+                        <i class="fa-solid fa-futbol"></i>
+                        <div>
+                            <h4>Physical Education</h4>
+                            <p>Fitness, football and volleyball</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admission Section -->
+    <section class="section-padding" id="admission">
+        <div class="container">
+            <div class="section-title">
+                <h2>Admission Process</h2>
+                <p>Your pathway to joining Egypt's premier applied technology institution</p>
+            </div>
+            <div class="admission-steps">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Application</h3>
+                    <p>Submit the online application form with required documents</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Entrance Exams</h3>
+                    <p>Take exams in English, Arabic, Math and Science</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Interview</h3>
+                    <p>Personal interview with school administration</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Final Acceptance</h3>
+                    <p>Receive admission decision and complete registration</p>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="/Applicant/Apply" class="btn btn-primary">Apply Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requirements Section -->
+    <section class="requirements section-padding" id="requirements">
+        <div class="container">
+            <div class="section-title">
+                <h2>Admission Requirements</h2>
+                <p>Eligibility criteria for applicants</p>
+            </div>
+            <div class="req-list">
+                <div class="req-item">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <h4>Academic Requirements</h4>
+                        <p>Minimum score of 220 in preparatory certificate with at least 48/60 in English</p>
+                    </div>
+                </div>
+                <div class="req-item">
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <h4>Age Limit</h4>
+                        <p>Applicant must not exceed 18 years by October 1st</p>
+                    </div>
+                </div>
+                <div class="req-item">
+                    <i class="fas fa-venus-mars"></i>
+                    <div>
+                        <h4>Gender</h4>
+                        <p>Open to both male and female students from all governorates</p>
+                    </div>
+                </div>
+                <div class="req-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <h4>School Hours</h4>
+                        <p>7:15 AM to 4:00 PM daily</p>
+                    </div>
+                </div>
+                <div class="req-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <div>
+                        <h4>Fees</h4>
+                        <p>Nominal annual fees (approx 250 EGP)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Staff Section -->
+    <section class="staff section-padding" id="staff">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Staff</h2>
+                <p>Meet the dedicated team behind Eva IATS</p>
+            </div>
+            <div class="staff-carousel-wrapper">
+                <div class="staff-track">
+                    <!-- Staff 1 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/staff/Mrs.%20Mona%20Rabbat.webp" alt="Mrs. Mona Rabbat">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Mrs. Mona Rabbat</h4>
+                            <p>Chairwoman Armanious Foundation</p>
+                        </div>
+                    </div>
+                    <!-- Staff 2 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/staff/Dr.%20Riad%20Armanious.webp" alt="Dr. Riad Armanious">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Dr. Riad Armanious</h4>
+                            <p>EVA Pharma CEO</p>
+                        </div>
+                    </div>
+                    <!-- Staff 3 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/staff/Eng.%20Sherif%20Gobran.webp" alt="Eng. Sherif Gobran">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Eng. Sherif Gobran</h4>
+                            <p>Executive Director Armanious Fdn</p>
+                        </div>
+                    </div>
+                    <!-- Staff 4 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/Staff/Mariam%20Fayez.jpg" alt="Ms. Mariam Fayez">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Ms. Mariam Fayez</h4>
+                            <p>Executive Supervisor</p>
+                        </div>
+                    </div>
+                    <!-- Staff 5 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/staff/Mrs%20Jehan.jpg" alt="Mrs. Jehan Ahmed">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Mrs. Jehan Ahmed</h4>
+                            <p>Academic Manager</p>
+                        </div>
+                    </div>
+                    <!-- Staff 6 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/staff/Eng.%20Abdulrahman%20Yehia.jpg" alt="Eng. Abdulrahman Yehia">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Eng. Abdulrahman Yehia</h4>
+                            <p>Software Engineering</p>
+                        </div>
+                    </div>
+                    <!-- Staff 7 -->
+                    <div class="staff-card">
+                        <div class="staff-img">
+                            <img src="images/staff/Eng.%20Ahmed%20Ezzat.jpg" alt="Eng. Ahmed Ezzat">
+                        </div>
+                        <div class="staff-info">
+                            <h4>Eng. Ahmed Ezzat</h4>
+                            <p>Software Engineering</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="section-padding" id="gallery">
+        <div class="container">
+            <div class="section-title">
+                <h2>School Gallery</h2>
+                <p>Moments from Eva ATS</p>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item"><img src="images/Eva/Event.jpg" alt="Event"></div>
+                <div class="gallery-item"><img src="images/Eva/Edu%20Tech%202024.jpg" alt="Edu Tech"></div>
+                <div class="gallery-item"><img src="images/Eva/Edu%20Tech%202025.jpg" alt="Edu Tech"></div>
+                <div class="gallery-item"><img src="images/Eva/Drama.jpg" alt="Drama"></div>
+                <div class="gallery-item"><img src="images/Eva/Factory.jpg" alt="Factory"></div>
+                <div class="gallery-item"><img src="images/Eva/Eva.jpg" alt="Eva Building"></div>
+                <div class="gallery-item"><img src="images/Eva/Kempiniski.jpg" alt="Kempinski"></div>
+                <div class="gallery-item"><img src="images/Eva/Football.jpg" alt="Football"></div>
+                <div class="gallery-item"><img src="images/Eva/S.jpg" alt="Football"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Map Section -->
+    <section class="contact section-padding" id="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact Us</h2>
+                <p>Get in touch with Eva IATS</p>
+            </div>
+
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>6th of October City, Giza, Egypt</p>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>iatsinfo22@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <div>
+                            <h4>Call</h4>
+                            <p>+20 10 699 97710</p>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h4>Working Hours</h4>
+                            <p>Sunday - Thursday: 8:00 AM - 3:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-wrapper">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4314.827962025171!2d30.92948895814941!3d29.913350106985604!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14585567bdbd1139%3A0x10815c4d843b6c7e!2z2YXYr9ix2LPYqSDYp9mK2YHYpyDYp9mE2K_ZiNmE2YrYqSDZhNmE2KrZg9mG2YjZhNmI2KzZitinINin2YTYqti32KjZitmC2YrYqQ!5e0!3m2!1sen!2seg!4v1752523113361!5m2!1sen!2seg"
+                            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <img src="images/logo%20remove.png" alt="Eva ATS Logo" style="height: 50px; margin-bottom: 20px;">
+                    <p>
+                        Eva International Applied Technology School - Preparing future technology leaders with
+                        world-class education.
+                    </p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/EVAtechSchool"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/armaniousfoundation/"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/company/armaniousfoundation">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#specializations">Specializations</a></li>
+                        <li><a href="#admission">Admission</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Us</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 6th of October City, Giza</li>
+                        <li><i class="fas fa-phone-alt"></i> +20 10 699 97710</li>
+                        <li><i class="fas fa-envelope"></i> iatsinfo22@gmail.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>
+                    &copy; 2026 Eva International Applied Technology School. All Rights Reserved. | Part of IATS Network
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main Logic -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

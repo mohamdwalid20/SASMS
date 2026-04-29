@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Students";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">All Students</h3>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="search-filter">
+                <i class="fas fa-search" style="color: #A098AE;"></i>
+                <input type="text" placeholder="Search student...">
+            </div>
+            <button class="dropdown-btn">
+                Grade <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 8px;"></i>
+            </button>
+            <button class="dropdown-btn">
+                Class <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Gender</th>
+                <th>Guardian</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="row-item">
+                <td><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                <td style="font-weight: 600; color: var(--primary);">#STD-1001</td>
+                <td class="user-cell">
+                    <img src="https://i.pravatar.cc/150?u=student1">
+                    <div class="user-meta">
+                        <div>Omar Youssef</div>
+                        <div>Grade 5</div>
+                    </div>
+                </td>
+                <td>5A</td>
+                <td>Male</td>
+                <td>Youssef Ibrahim</td>
+                <td>+20 111 222 3333</td>
+                <td><span class="status-badge st-paid">Active</span></td>
+                <td>
+                    <button class="action-btn"><i class="far fa-edit"></i></button>
+                    <button class="action-btn"><i class="far fa-trash-alt"></i></button>
+                </td>
+            </tr>
+            <tr class="row-item">
+                <td><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                <td style="font-weight: 600; color: var(--primary);">#STD-1002</td>
+                <td class="user-cell">
+                    <img src="https://i.pravatar.cc/150?u=student2">
+                    <div class="user-meta">
+                        <div>Nour Hassan</div>
+                        <div>Grade 3</div>
+                    </div>
+                </td>
+                <td>3B</td>
+                <td>Female</td>
+                <td>Hassan Ali</td>
+                <td>+20 122 333 4444</td>
+                <td><span class="status-badge st-paid">Active</span></td>
+                <td>
+                    <button class="action-btn"><i class="far fa-edit"></i></button>
+                    <button class="action-btn"><i class="far fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

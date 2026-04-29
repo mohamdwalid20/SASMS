@@ -1,0 +1,94 @@
+@{
+    ViewData["Title"] = "Fees";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">Fees Management</h3>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+             <button class="dropdown-btn" style="background: var(--primary); color: white;">
+                <i class="fas fa-plus"></i> Collect Fees
+            </button>
+            <div class="search-filter">
+                <i class="fas fa-search" style="color: #A098AE;"></i>
+                <input type="text" placeholder="Search invoice...">
+            </div>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Invoice ID</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Amount</th>
+                <th>Paid</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="row-item">
+                <td style="font-weight: 600; color: var(--primary);">#INV-00123</td>
+                <td class="user-cell">
+                    <img src="https://i.pravatar.cc/150?u=fee1">
+                    <div class="user-meta">
+                        <div>Omar Youssef</div>
+                        <div>2015-02-011</div>
+                    </div>
+                </td>
+                <td>5A</td>
+                <td>$5,000</td>
+                <td style="color: #4CAF50;">$5,000</td>
+                <td>Oct 01, 2025</td>
+                <td><span class="status-badge st-paid">Paid</span></td>
+                <td>
+                    <button class="action-btn"><i class="fas fa-print"></i></button>
+                    <button class="action-btn"><i class="far fa-envelope"></i></button>
+                </td>
+            </tr>
+            <tr class="row-item">
+                <td style="font-weight: 600; color: var(--primary);">#INV-00124</td>
+                <td class="user-cell">
+                    <img src="https://i.pravatar.cc/150?u=fee2">
+                    <div class="user-meta">
+                        <div>Nour Hassan</div>
+                        <div>2015-02-012</div>
+                    </div>
+                </td>
+                <td>3B</td>
+                <td>$4,500</td>
+                <td style="color: #FF5252;">$0</td>
+                <td>Oct 01, 2025</td>
+                <td><span class="status-badge st-overdue">Unpaid</span></td>
+                <td>
+                    <button class="action-btn"><i class="fas fa-print"></i></button>
+                    <button class="action-btn"><i class="far fa-envelope"></i></button>
+                </td>
+            </tr>
+             <tr class="row-item">
+                <td style="font-weight: 600; color: var(--primary);">#INV-00125</td>
+                <td class="user-cell">
+                     <div style="width: 40px; height: 40px; background: #FFF4E5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FCC43E; font-weight: 700;">L</div>
+                    <div class="user-meta">
+                        <div>Laila Magdy</div>
+                        <div>2015-02-015</div>
+                    </div>
+                </td>
+                <td>KG 1</td>
+                <td>$3,200</td>
+                <td style="color: #FCC43E;">$1,600</td>
+                <td>Oct 01, 2025</td>
+                <td><span class="status-badge st-pending">Partial</span></td>
+                <td>
+                    <button class="action-btn"><i class="fas fa-print"></i></button>
+                    <button class="action-btn"><i class="far fa-envelope"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

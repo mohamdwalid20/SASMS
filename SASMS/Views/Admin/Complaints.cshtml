@@ -1,0 +1,184 @@
+@model IEnumerable<SASMS.ViewModels.ComplaintViewModel>
+@{
+    ViewData["Title"] = "Complaints";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">Complaints & Issues</h3>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="search-filter">
+                <i class="fas fa-search" style="color: #A098AE;"></i>
+                <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterComplaints()">
+            </div>
+            <select class="dropdown-btn" id="statusFilter" onchange="filterComplaints()" style="padding: 12px 20px;">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="InProgress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subject</th>
+                <th>Submitted By</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="complaintsTable">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var complaint in Model)
+                {
+                    <tr class="row-item" data-status="@complaint.Status" data-search="@(complaint.ComplaintId + " " + complaint.Title + " " + complaint.SubmittedBy)">
+                        <td style="font-weight: 600; color: var(--primary);">@complaint.ComplaintId</td>
+                        <td>@complaint.Title</td>
+                        <td class="user-cell">
+                            @if (!string.IsNullOrEmpty(complaint.StudentProfilePicture))
+                            {
+                                <img src="@complaint.StudentProfilePicture" alt="@complaint.SubmittedBy" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div style="width: 40px; height: 40px; background: #E1F1FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 700;">
+                                    @complaint.SubmittedBy.Substring(0, 1).ToUpper()
+                                </div>
+                            }
+                            <div>@complaint.SubmittedBy</div>
+                        </td>
+                        <td>
+                            <span class="category-badge">
+                                @complaint.Category
+                            </span>
+                        </td>
+                        <td>@complaint.ComplaintDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            @{
+                                var priorityColor = complaint.Priority switch
+                                {
+                                    "High" or "Urgent" => "#FF5252",
+                                    "Medium" or "Normal" => "#FCC43E",
+                                    _ => "#4CAF50"
+                                };
+                            }
+                            <span style="color: @priorityColor; font-weight: 600;">@complaint.Priority</span>
+                        </td>
+                        <td>
+                            @if (complaint.Status == "Pending")
+                            {
+                                <span class="status-badge st-pending"><span class="dot"></span> Pending</span>
+                            }
+                            else if (complaint.Status == "InProgress")
+                            {
+                                <span class="status-badge st-paid" style="background: #E6F7FF; color: #4CACFF;"><span class="dot"></span> In Progress</span>
+                            }
+                            else if (complaint.Status == "Resolved")
+                            {
+                                <span class="status-badge st-paid"><span class="dot"></span> Resolved</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge st-overdue"><span class="dot"></span> @complaint.Status</span>
+                            }
+                        </td>
+                        <td style="display: flex; gap: 8px; align-items: center;">
+                            @if (complaint.Status == "Pending" || complaint.Status == "InProgress")
+                            {
+                                <button class="action-btn" onclick="resolveComplaint(@complaint.Id)" title="Mark as Resolved" style="background: #4CAF50; color: white; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                                    Resolve
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="action-btn" disabled style="opacity: 0.5;">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            }
+
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-gray);">
+                        <i class="fas fa-inbox" style="font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.5;"></i>
+                        No complaints found.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+    function filterComplaints() {
+        const searchValue = document.getElementById('searchInput').value.toLowerCase();
+        const statusValue = document.getElementById('statusFilter').value;
+        const rows = document.querySelectorAll('#complaintsTable .row-item');
+        
+        rows.forEach(row => {
+            const searchText = row.getAttribute('data-search').toLowerCase();
+            const rowStatus = row.getAttribute('data-status');
+            
+            const matchesSearch = searchValue === '' || searchText.includes(searchValue);
+            const matchesStatus = statusValue === '' || rowStatus === statusValue;
+            
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function resolveComplaint(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to mark this complaint as resolved?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4CAF50',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, resolve it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/Complaint/UpdateStatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${id}&status=Resolved`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Resolved!', 'The complaint has been marked as resolved.', 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'An error occurred', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'An error occurred while updating the complaint', 'error');
+                });
+            }
+        });
+    }
+</script>
+}

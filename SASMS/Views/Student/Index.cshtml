@@ -1,0 +1,98 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["Students"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .selection-container {
+        padding: 32px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .selection-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+        margin-top: 48px;
+    }
+
+    .dept-card {
+        background: white;
+        border-radius: 28px;
+        padding: 48px 32px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        border: 2px solid transparent;
+        box-shadow: 0 12px 36px rgba(0,0,0,0.06);
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dept-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 24px 48px rgba(0,0,0,0.12);
+        border-color: var(--primary);
+    }
+
+    .dept-card i {
+        font-size: 72px;
+        margin-bottom: 28px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .dept-card h3 {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 16px;
+    }
+
+    .dept-card p {
+        color: var(--text-gray);
+        font-size: 16px;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .page-header {
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+    }
+</style>
+
+<div class="selection-container">
+    <div class="page-header">
+        <h1>@Localizer["Student Directory"]</h1>
+        <p>@Localizer["Select a department to view enrolled students"]</p>
+    </div>
+
+    <div class="selection-grid">
+        <!-- Operation & Maintenance -->
+        <a href="@Url.Action("List", "Student", new { departmentId = 1 })" class="dept-card">
+            <i class="fas fa-tools"></i>
+            <h3>@Localizer["Operation & Maintenance"]</h3>
+            <p>@Localizer["View students in engineering and facility operations"]</p>
+        </a>
+
+        <!-- Software Development -->
+        <a href="@Url.Action("List", "Student", new { departmentId = 2 })" class="dept-card">
+            <i class="fas fa-code"></i>
+            <h3>@Localizer["Software Development"]</h3>
+            <p>@Localizer["View students in programming and technical development"]</p>
+        </a>
+    </div>
+</div>

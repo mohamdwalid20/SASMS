@@ -1,0 +1,203 @@
+@{
+    ViewData["Title"] = "Application Submitted Successfully";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4D44B5;
+            --primary-dark: #3a3390;
+            --text-dark: #303972;
+            --text-gray: #A098AE;
+            --bg-body: #F3F4FF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .success-container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-bar {
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary) 0%, #764ba2 100%);
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(77, 68, 181, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .success-icon i {
+            font-size: 40px;
+            color: var(--primary);
+        }
+
+        @@keyframes scaleIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 28px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .application-number {
+            font-size: 18px;
+            color: var(--primary);
+            font-weight: 600;
+            margin: 24px 0;
+            padding: 20px;
+            background: #FAFAFB;
+            border: 1px dashed #CABFFD;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .application-number span {
+            font-size: 14px;
+            color: var(--text-gray);
+            font-weight: 400;
+        }
+
+        p {
+            font-size: 16px;
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(77, 68, 181, 0.2);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1px solid #E5E7EB;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 6px 15px rgba(77, 68, 181, 0.3);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: #F8F9FF;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="brand-bar"></div>
+
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        
+        <h1>Application Submitted!</h1>
+        <p>Thank you for applying. Your application has been received successfully.</p>
+        
+        <div class="application-number">
+            <span>Application Reference Number</span>
+            @TempData["ApplicationNumber"]
+        </div>
+        
+        <p>
+            Your application will be reviewed by our admissions team.<br>
+            We will contact you shortly via email or phone.
+        </p>
+        
+        <div class="button-group">
+            <a href="@Url.Action("Index", "Land")" class="btn btn-primary">
+                Back to Home <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="@Url.Action("Login", "Account")" class="btn btn-outline">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+    <script>
+        // Clear the draft on success
+        localStorage.removeItem('sasms_applicant_draft');
+    </script>
+</body>
+</html>

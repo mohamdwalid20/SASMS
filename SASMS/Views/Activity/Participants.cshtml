@@ -1,0 +1,207 @@
+@model SASMS.Models.Activity
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["ActivityParticipants"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.Id" style="color: var(--text-gray); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <i class="fas fa-arrow-left"></i> @Localizer["BackToActivity"]
+            </a>
+            <h2 class="widget-title" style="margin: 0; display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-users" style="color: var(--primary);"></i>
+                @Model.Title - @Localizer["Participants"]
+            </h2>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="text-align: right; margin-right: 20px;">
+                <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["TotalParticipants"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--primary);">
+                    @Model.Participations.Count(p => p.Status != "Cancelled" && p.Status != "Rejected")
+                    @if (!Model.IsUnlimitedCapacity && Model.Capacity.HasValue)
+                    {
+                        <span style="font-size: 16px; color: var(--text-gray);">/ @Model.Capacity</span>
+                    }
+                </div>
+            </div>
+            @if (Model.Participations.Any(p => p.IsApproved == null || p.IsApproved == false || p.IsApproved == true))
+            {
+                bool canManage = User.IsInRole("Admin") || User.IsInRole("StudentAffairs") || User.IsInRole("Supervisor");
+                @if (canManage)
+                {
+                    <div style="display: flex; gap: 8px;">
+                        <form asp-action="ApproveAll" asp-route-activityId="@Model.Id" method="post" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="bulk-btn" style="background: #38F9D7; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(56, 249, 215, 0.3);">
+                                <i class="fas fa-check-double"></i>
+                                @Localizer["ApproveAll"]
+                            </button>
+                        </form>
+                        <form asp-action="RejectAll" asp-route-activityId="@Model.Id" method="post" 
+                              onsubmit="confirmAction(event, this)"
+                              data-confirm-title="@Localizer["RejectAllConfirmation"]"
+                              data-confirm-text="@Localizer["ActionCannotBeUndone"]"
+                              data-confirm-icon="warning"
+                              data-confirm-yes="@Localizer["YesRejectAll"]"
+                              style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="bulk-btn" style="background: #FF5252; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(255, 82, 82, 0.3);">
+                                <i class="fas fa-times-circle"></i>
+                                @Localizer["RejectAll"]
+                            </button>
+                        </form>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    @if (Model.Participations.Any())
+    {
+        <div class="content-card" style="padding: 0; border-radius: 16px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.05); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #F8F9FF; border-bottom: 2px solid #E0E0E0;">
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase;">@Localizer["Student"]</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase;">@Localizer["Email"]</th>
+                        <th style="padding: 16px; text-align: left; font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase;">@Localizer["RegistrationDate"]</th>
+                        <th style="padding: 16px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase;">@Localizer["Status"]</th>
+                        <th style="padding: 16px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase;">@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var participation in Model.Participations.OrderByDescending(p => p.RegistrationDate))
+                    {
+                        var statusColor = participation.Status switch
+                        {
+                            "Registered" => "#FCC43E",
+                            "Confirmed" => "#38F9D7",
+                            "Cancelled" => "#A098AE",
+                            "Rejected" => "#FF5252",
+                            _ => "#4D44B5"
+                        };
+
+                        <tr style="border-bottom: 1px solid #F0F0F0; transition: background 0.2s;">
+                            <td style="padding: 16px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    @if (!string.IsNullOrEmpty(participation.Student?.User?.ProfilePicturePath))
+                                    {
+                                        <img src="@participation.Student.User.ProfilePicturePath" style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <img src="https://ui-avatars.com/api/?name=@participation.Student?.User?.Name&background=random" style="width: 40px; height: 40px; border-radius: 10px;">
+                                    }
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-dark); font-size: 14px;">@participation.Student?.User?.Name</div>
+                                        <div style="font-size: 12px; color: var(--text-gray);">ID: @participation.Student?.StudentId</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding: 16px;">
+                                <div style="font-size: 13px; color: var(--text-dark);">@participation.Student?.User?.Email</div>
+                            </td>
+                            <td style="padding: 16px;">
+                                <div style="font-size: 13px; color: var(--text-dark);">@participation.RegistrationDate.ToString("MMM dd, yyyy")</div>
+                                <div style="font-size: 11px; color: var(--text-gray);">@participation.RegistrationDate.ToString("HH:mm")</div>
+                            </td>
+                            <td style="padding: 16px; text-align: center;">
+                                <span style="background: @statusColor; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">
+                                    @participation.Status
+                                </span>
+                            </td>
+                            <td style="padding: 16px; text-align: center;">
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    @{
+                                        bool canManageRow = User.IsInRole("Admin") || User.IsInRole("StudentAffairs") || User.IsInRole("Supervisor");
+                                    }
+                                    @if (canManageRow)
+                                    {
+                                        if (participation.Status == "Registered" || participation.IsApproved == null)
+                                        {
+                                            <form asp-action="ApproveParticipation" asp-route-id="@participation.Id" asp-route-activityId="@Model.Id" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-action" style="background: #F0FFF4; color: #38F9D7; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;" title="@Localizer["Approve"]">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-action="RejectParticipation" asp-route-id="@participation.Id" asp-route-activityId="@Model.Id" method="post" 
+                                                  onsubmit="confirmAction(event, this)"
+                                                  data-confirm-title="@Localizer["RejectConfirmation"]"
+                                                  data-confirm-text="@Localizer["ActionCannotBeUndone"]"
+                                                  data-confirm-icon="warning"
+                                                  data-confirm-yes="@Localizer["YesReject"]"
+                                                  style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-action" style="background: #FFF0F0; color: #FF5252; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;" title="@Localizer["Reject"]">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        if (participation.Status == "Rejected" && participation.IsApproved == false)
+                                        {
+                                            <form asp-action="ApproveParticipation" asp-route-id="@participation.Id" asp-route-activityId="@Model.Id" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-action" style="background: #F0FFF4; color: #38F9D7; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;" title="@Localizer["Approve"]">
+                                                    <i class="fas fa-undo"></i> @Localizer["Restore"]
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size: 11px; color: var(--text-gray); font-style: italic;">@Localizer["ViewOnly"]</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="content-card" style="padding: 60px; text-align: center; border-radius: 16px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.05);">
+            <i class="fas fa-users" style="font-size: 64px; color: #E0E0E0; margin-bottom: 16px;"></i>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: var(--text-dark);">@Localizer["NoParticipants"]</h3>
+            <p style="margin: 0; font-size: 14px; color: var(--text-gray);">@Localizer["NoParticipantsMessage"]</p>
+        </div>
+    }
+</div>
+
+<style>
+    tbody tr:hover {
+        background: #FAFAFA;
+    }
+
+    .btn-action:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
+        transition: all 0.2s;
+    }
+
+    .bulk-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        transition: all 0.2s;
+    }
+
+    html[dir="rtl"] table th,
+    html[dir="rtl"] table td {
+        text-align: right;
+    }
+
+    html[dir="rtl"] table th:nth-child(4),
+    html[dir="rtl"] table td:nth-child(4),
+    html[dir="rtl"] table th:nth-child(5),
+    html[dir="rtl"] table td:nth-child(5) {
+        text-align: center;
+    }
+</style>

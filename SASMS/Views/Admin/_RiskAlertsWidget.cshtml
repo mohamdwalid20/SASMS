@@ -1,0 +1,72 @@
+@using SASMS.Models
+@using SASMS.Services
+@inject IRiskDetectionService RiskService
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{
+    var alerts = await RiskService.GetUnresolvedAlertsAsync();
+    var topAlerts = alerts.Take(5).ToList();
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">
+            <i class="fas fa-exclamation-triangle text-danger me-2"></i> @Localizer["Critical Risk Alerts"]
+        </h5>
+        @if (alerts.Any())
+        {
+            <span class="badge bg-danger rounded-pill">@alerts.Count() @Localizer["Active"]</span>
+        }
+    </div>
+    <div class="card-body p-0">
+        @if (!topAlerts.Any())
+        {
+            <div class="text-center py-4">
+                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                <p class="text-muted small mb-0">@Localizer["No active risks detected."]</p>
+            </div>
+        }
+        else
+        {
+            <div class="list-group list-group-flush">
+                @foreach (var alert in topAlerts)
+                {
+                    <a href="@Url.Action("RiskAlerts", "Admin", new { type = alert.Type })" class="list-group-item list-group-item-action border-0 px-3 py-3 border-start border-4 border-@GetColor(alert.Type)">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-1 fw-bold small">@alert.Message</h6>
+                            <small class="text-muted">@alert.CreatedAt.ToString("HH:mm")</small>
+                        </div>
+                        <div class="d-flex align-items-center mt-1">
+                            <span class="badge bg-light text-dark extra-small border me-2">@Localizer[alert.Type]</span>
+                            @if (alert.Student != null)
+                            {
+                                <span class="text-muted extra-small"><i class="fas fa-user me-1"></i> @alert.Student.User.Name</span>
+                            }
+                        </div>
+                    </a>
+                }
+            </div>
+            @if (alerts.Count() > 5)
+            {
+                <div class="p-2 text-center border-top">
+                    <a href="@Url.Action("RiskAlerts", "Admin")" class="btn btn-link btn-sm text-decoration-none text-primary">
+                        @Localizer["View All Risk Cases"] <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .border-attendance { border-left-color: #dc3545 !important; }
+    .border-financial { border-left-color: #fd7e14 !important; }
+    .border-application { border-left-color: #0d6efd !important; }
+    .border-complaint { border-left-color: #6f42c1 !important; }
+    .extra-small { font-size: 0.7rem; }
+</style>
+
+@functions {
+    string GetColor(string type) => type.ToLower();
+}

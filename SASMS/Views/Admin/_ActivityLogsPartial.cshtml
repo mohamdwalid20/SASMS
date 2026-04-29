@@ -1,0 +1,370 @@
+@model IEnumerable<SASMS.Models.ActivityLog>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+<style>
+    .activity-logs-container {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .log-header {
+        margin-bottom: 25px;
+    }
+
+    .log-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1c21;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .log-subtitle {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .filters-wrapper {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filter-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-input {
+        height: 38px;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #1e293b;
+        background: white;
+        transition: 0.2s;
+    }
+
+    .filter-input:focus {
+        border-color: #4d44b5;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(77, 68, 181, 0.1);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-apply {
+        background: #4d44b5;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-apply:hover {
+        background: #3d35a0;
+        transform: translateY(-1px);
+    }
+
+    .btn-reset {
+        background: white;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-reset:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+
+    .logs-table-container {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+    }
+
+    .logs-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .logs-table th {
+        background: #f8fafc;
+        padding: 12px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .logs-table td {
+        padding: 16px;
+        font-size: 13px;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .logs-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .logs-table tr:hover td {
+        background: #fcfdfe;
+    }
+
+    .timestamp-cell {
+        min-width: 120px;
+    }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #eef2ff;
+        color: #4d44b5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12px;
+    }
+
+    .user-info .name {
+        font-weight: 600;
+        color: #1e293b;
+        display: block;
+    }
+
+    .user-info .role {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    .action-badge {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .badge-success { background: #dcfce7; color: #15803d; }
+    .badge-danger { background: #fee2e2; color: #dc2626; }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+    .badge-primary { background: #eef2ff; color: #4d44b5; }
+    .badge-secondary { background: #f1f5f9; color: #475569; }
+
+    .entity-tag {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        background: #f8fafc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .details-text {
+        color: #64748b;
+        line-height: 1.5;
+        max-width: 300px;
+        word-break: break-word;
+    }
+
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 40px;
+        color: #e2e8f0;
+        margin-bottom: 15px;
+    }
+
+    .empty-text {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* RTL Support */
+    [dir="rtl"] .logs-table {
+        text-align: right;
+    }
+    [dir="rtl"] .action-badge {
+        margin-right: 0;
+        margin-left: auto;
+    }
+</style>
+
+<div class="activity-logs-container">
+    <div class="log-header">
+        <h2 class="log-title">
+            <i class="fas fa-history" style="color: #4d44b5;"></i>
+            @Localizer["ActivityLog"]
+        </h2>
+        <p class="log-subtitle">@Localizer["MonitorSystemEventsAndUserActions"]</p>
+    </div>
+
+    <!-- Redesigned Filters -->
+    <div class="filters-wrapper">
+        <form id="activityFilterForm" class="filters-grid">
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Search"]</label>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="filter-input" placeholder="@Localizer["SearchLogs"]...">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Action"]</label>
+                <select name="actionFilter" class="filter-input">
+                    <option value="">@Localizer["AllActions"]</option>
+                    @foreach (var action in ViewBag.Actions)
+                    {
+                        <option value="@action" selected="@(ViewBag.ActionFilter == action)">@action</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["From"]</label>
+                <input type="date" name="startDate" value="@ViewBag.StartDate" class="filter-input">
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["To"]</label>
+                <input type="date" name="endDate" value="@ViewBag.EndDate" class="filter-input">
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn-apply">
+                    <i class="fas fa-filter"></i> @Localizer["Filter"]
+                </button>
+                <button type="button" onclick="resetLogsFilter()" class="btn-reset" title="@Localizer["Reset"]">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Premium Table -->
+    <div class="logs-table-container">
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>@Localizer["Timestamp"]</th>
+                    <th>@Localizer["User"]</th>
+                    <th>@Localizer["Action"]</th>
+                    <th>@Localizer["Entity"]</th>
+                    <th>@Localizer["Details"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="empty-text">@Localizer["NoActivityLogsFound"]</div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var log in Model)
+                    {
+                        <tr>
+                            <td class="timestamp-cell">
+                                <div style="font-weight: 600; color: #1e293b;">@log.Timestamp.ToLocalTime().ToString("MMM dd, yyyy")</div>
+                                <div style="font-size: 11px; color: #64748b;">@log.Timestamp.ToLocalTime().ToString("hh:mm tt")</div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="avatar">
+                                        @(string.IsNullOrEmpty(log.UserName) ? "S" : log.UserName.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div class="user-info">
+                                        <span class="name">@log.UserName</span>
+                                        <span class="role">@log.UserRole</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="action-badge @(GetBadgeTheme(log.Action))">@log.Action</span>
+                            </td>
+                            <td>
+                                <div style="color: #1e293b; font-weight: 500; margin-bottom: 4px;">@log.EntityName</div>
+                                <span class="entity-tag">#@log.EntityId</span>
+                            </td>
+                            <td>
+                                <div class="details-text">@log.Details</div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@functions {
+    public string GetBadgeTheme(string action)
+    {
+        return action switch
+        {
+            "Login" => "badge-success",
+            "Login Failed" => "badge-danger",
+            "Logout" => "badge-secondary",
+            "Created" or "Activity Created" or "Fee Created" or "Published" => "badge-primary",
+            "Updated" or "Activity Updated" or "Status Updated" => "badge-info",
+            "Deleted" or "Activity Deleted" or "Rejected" => "badge-danger",
+            _ => "badge-secondary"
+        };
+    }
+}

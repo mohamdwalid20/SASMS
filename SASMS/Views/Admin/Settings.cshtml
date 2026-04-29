@@ -1,0 +1,892 @@
+@model SASMS.Models.User
+@using Microsoft.Extensions.Localization
+
+
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Settings"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .settings-container {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 30px;
+    }
+
+    .settings-sidebar {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        height: fit-content;
+    }
+
+    .settings-tab {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        color: var(--text-gray);
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-bottom: 8px;
+        text-decoration: none;
+    }
+
+    .settings-tab:hover {
+        background: #F8F9FF;
+        color: var(--primary);
+    }
+
+    .settings-tab.active {
+        background: var(--primary-light);
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .settings-tab i {
+        width: 20px;
+        font-size: 16px;
+    }
+
+    .settings-content {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+    }
+
+    .settings-section {
+        display: none;
+    }
+
+    .settings-section.active {
+        display: block;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+    }
+
+    .section-desc {
+        color: var(--text-gray);
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        font-family: var(--font);
+        font-size: 14px;
+        color: var(--text-dark);
+        transition: 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(77, 68, 181, 0.1);
+    }
+
+    .profile-upload {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #F8F9FF;
+        border-radius: 12px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #D3C1FA 0%, #C5B0F5 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        font-weight: 700;
+        color: white;
+    }
+
+    .upload-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .upload-btn:hover {
+        background: #3d35a0;
+    }
+
+    .remove-btn {
+        background: transparent;
+        color: #FF4D4D;
+        border: 1px solid #FF4D4D;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .remove-btn:hover {
+        background: #FFF5F5;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(24px);
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #F0F0F0;
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-info h4 {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+    }
+
+    .setting-info p {
+        font-size: 13px;
+        color: var(--text-gray);
+        margin: 0;
+    }
+
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .save-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .save-btn:hover {
+        background: #3d35a0;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(77, 68, 181, 0.3);
+    }
+</style>
+
+<div class="settings-container">
+    <!-- Sidebar Tabs -->
+    <div class="settings-sidebar">
+        <h3 style="font-size: 20px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px;">@Localizer["Settings"]</h3>
+        
+        <a href="#" class="settings-tab active" data-tab="profile">
+            <i class="far fa-user"></i>
+            <span>@Localizer["Profile"]</span>
+        </a>
+        
+        <a href="#" class="settings-tab" data-tab="security">
+            <i class="fas fa-lock"></i>
+            <span>@Localizer["Security"]</span>
+        </a>
+        
+        <a href="#" class="settings-tab" data-tab="notifications">
+            <i class="far fa-bell"></i>
+            <span>@Localizer["Notifications"]</span>
+        </a>
+        
+        <a href="#" class="settings-tab" data-tab="appearance">
+            <i class="fas fa-palette"></i>
+            <span>@Localizer["Appearance"]</span>
+        </a>
+
+        @if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value == "StudentAffairs")
+        {
+            <a href="#" class="settings-tab" data-tab="system">
+                <i class="fas fa-server"></i>
+                <span>@Localizer["System"]</span>
+            </a>
+
+            <a href="#" class="settings-tab" data-tab="activity-logs">
+                <i class="fas fa-history"></i>
+                <span>@Localizer["Activity Log"]</span>
+            </a>
+
+            <a href="#" class="settings-tab" data-tab="backups">
+                <i class="fas fa-shield-alt"></i>
+                <span>@Localizer["SystemBackup"]</span>
+            </a>
+        }
+    </div>
+
+    <!-- Content Area -->
+    <div class="settings-content">
+        <!-- Profile Section -->
+        <div class="settings-section active" id="profile-section">
+            <h2 class="section-title">@Localizer["ProfileSettings"]</h2>
+            <p class="section-desc">@Localizer["ManagePersonalInfo"]</p>
+
+            <!-- Profile Photo Upload -->
+            <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+                <div class="profile-upload">
+                    <div class="profile-avatar" id="profileAvatar" style="background-image: url('@(!string.IsNullOrEmpty(User.FindFirst("ProfilePicture")?.Value) ? User.FindFirst("ProfilePicture")?.Value : "")'); background-size: cover; background-position: center;">
+                        @if(string.IsNullOrEmpty(User.FindFirst("ProfilePicture")?.Value))
+                        {
+                            @(!string.IsNullOrEmpty(User.Identity?.Name) ? User.Identity.Name.Substring(0, 1).ToUpper() : "A")
+                        }
+                    </div>
+                     <div>
+                        <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">@Localizer["ProfilePicture"]</h4>
+                        <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px;">PNG, JPG up to 5MB</p>
+                        <div style="display: flex; gap: 12px;">
+                            <label for="photoUpload" class="upload-btn">
+                                <i class="fas fa-upload"></i> @Localizer["UploadPhoto"]
+                            </label>
+                            <input type="file" id="photoUpload" name="profilePicture" accept="image/*" style="display: none;">
+                            <button type="button" class="remove-btn"><i class="far fa-trash-alt"></i> @Localizer["Remove"]</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Form -->
+                <div class="two-col">
+                    <div class="form-group">
+                        <label>@Localizer["FullName"]</label>
+                        <input type="text" name="name" value="@Model?.Name" placeholder="@Localizer["EnterFullName"]">
+                    </div>
+                    <div class="form-group">
+                        <label>@Localizer["EmailAddress"]</label>
+                        <input type="email" name="email" value="@Model?.Email" placeholder="@Localizer["EnterEmail"]">
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div class="form-group">
+                        <label>@Localizer["PhoneNumber"]</label>
+                        <input type="tel" name="phone" value="@Model?.PhoneNumber" placeholder="+20 123 456 7890">
+                    </div>
+                    <div class="form-group">
+                        <label>@Localizer["JobTitle"]</label>
+                        <input type="text" value="@Localizer[Model?.Role.ToString() ?? "Staff"]" disabled placeholder="Your role">
+                    </div>
+                </div>
+
+                <button type="submit" class="save-btn">@Localizer["SaveChanges"]</button>
+            </form>
+        </div>
+
+        <!-- Security Section -->
+        <div class="settings-section" id="security-section">
+            <h2 class="section-title">@Localizer["SecuritySettings"]</h2>
+            <p class="section-desc">@Localizer["ManageSecurity"]</p>
+
+            <form asp-action="UpdatePassword" method="post">
+                <div class="form-group">
+                    <label>@Localizer["CurrentPassword"]</label>
+                    <input type="password" name="currentPassword" placeholder="@Localizer["EnterCurrentPassword"]">
+                </div>
+
+                <div class="two-col">
+                    <div class="form-group">
+                        <label>@Localizer["NewPassword"]</label>
+                        <input type="password" name="newPassword" placeholder="@Localizer["EnterNewPassword"]">
+                    </div>
+                    <div class="form-group">
+                        <label>@Localizer["ConfirmPassword"]</label>
+                        <input type="password" name="confirmPassword" placeholder="@Localizer["ConfirmNewPasswordPlaceholder"]">
+                    </div>
+                </div>
+
+                <div style="background: #FFF9E5; padding: 16px; border-radius: 10px; margin-bottom: 24px;">
+                    <p style="font-size: 13px; color: #856404; margin: 0;">
+                        <i class="fas fa-info-circle"></i> @Localizer["PasswordRequirements"]
+                    </p>
+                </div>
+
+                <button type="submit" class="save-btn">@Localizer["UpdatePassword"]</button>
+            </form>
+        </div>
+
+        <!-- Notifications Section -->
+        <div class="settings-section" id="notifications-section">
+            <h2 class="section-title">@Localizer["NotificationPreferences"]</h2>
+            <p class="section-desc">@Localizer["ControlNotifications"]</p>
+
+            <form asp-action="UpdatePreferences" method="post">
+                @Html.AntiForgeryToken()
+                @{
+                    var role = Model.Role;
+                    bool isAdmin = role == SASMS.Models.UserRole.Admin || role == SASMS.Models.UserRole.StudentAffairs;
+                    bool isSupervisor = role == SASMS.Models.UserRole.Supervisor;
+                    bool isActivityTeacher = role == SASMS.Models.UserRole.ActivityTeacher;
+                    bool isStudent = role == SASMS.Models.UserRole.Student;
+                }
+
+                @if (isAdmin || isSupervisor || isStudent)
+                {
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["ComplaintNotifications"]</h4>
+                            <p>@Localizer["ComplaintNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyComplaints" value="true" @(Model.NotifyOnComplaints ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["SuggestionNotifications"]</h4>
+                            <p>@Localizer["SuggestionNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifySuggestions" value="true" @(Model.NotifyOnSuggestions ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                }
+
+                @if (isAdmin)
+                {
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["AdmissionNotifications"]</h4>
+                            <p>@Localizer["AdmissionNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyApplications" value="true" @(Model.NotifyOnApplications ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                }
+
+                @if (isAdmin || isStudent)
+                {
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["AttendanceNotifications"]</h4>
+                            <p>@Localizer["AttendanceNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyAttendance" value="true" @(Model.NotifyOnAttendance ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["FeeNotifications"]</h4>
+                            <p>@Localizer["FeeNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyFees" value="true" @(Model.NotifyOnFees ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                }
+
+                @if (isAdmin || isSupervisor || isActivityTeacher)
+                {
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["ActivityRegistrationNotifications"]</h4>
+                            <p>@Localizer["ActivityRegistrationNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyActivityRegistration" value="true" @(Model.NotifyOnActivityRegistration ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                }
+
+                @if (isSupervisor || isStudent)
+                {
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["NewActivityNotifications"]</h4>
+                            <p>@Localizer["NewActivityNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyNewActivity" value="true" @(Model.NotifyOnNewActivity ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                }
+
+                @if (isAdmin || isActivityTeacher)
+                {
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>@Localizer["MessageNotifications"]</h4>
+                            <p>@Localizer["MessageNotificationDesc"]</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="notifyMessages" value="true" @(Model.NotifyOnMessages ? "checked" : "")>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                }
+
+
+
+                <button type="submit" class="save-btn" style="margin-top: 20px;">@Localizer["SavePreferences"]</button>
+            </form>
+        </div>
+
+        <!-- Appearance Section -->
+        <div class="settings-section" id="appearance-section">
+            <h2 class="section-title">@Localizer["Appearance"]</h2>
+            <p class="section-desc">@Localizer["CustomizeAppearance"]</p>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>@Localizer["DarkMode"]</h4>
+                    <p>@Localizer["DarkModeDesc"]</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle" @(Model.IsDarkMode ? "checked" : "")>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <script>
+                document.getElementById('darkModeToggle').addEventListener('change', function() {
+                    var isDarkMode = this.checked;
+                    fetch('@Url.Action("UpdateAppearance", "Admin")', {
+                        method: 'POST',
+                        body: new URLSearchParams({ darkMode: isDarkMode }),
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (data.isDarkMode) {
+                                document.body.classList.add('dark-mode');
+                            } else {
+                                document.body.classList.remove('dark-mode');
+                            }
+                            // Reload to ensure all styles/charts re-render cleanly if needed, or just let CSS handle it
+                            // location.reload(); 
+                        }
+                    });
+                });
+            </script>
+
+            <div class="form-group" style="margin-top: 24px;">
+                <label>@Localizer["Language"]</label>
+                <select id="languageSelect">
+                    <option value="en" selected="@(Model.Language == "en")">@Localizer["English"]</option>
+                    <option value="ar" selected="@(Model.Language == "ar")">@Localizer["Arabic"]</option>
+                </select>
+            </div>
+
+
+
+            <button class="save-btn">@Localizer["SaveChanges"]</button>
+        </div>
+
+        @if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value == "StudentAffairs")
+        {
+            <!-- System Section -->
+            <div class="settings-section" id="system-section">
+                <h2 class="section-title">@Localizer["SystemSettings"]</h2>
+                <p class="section-desc">@Localizer["ConfigureSchoolLocation"]</p>
+
+                <form id="systemSettingsForm">
+                    @Html.AntiForgeryToken()
+                    <div class="two-col">
+                        <div class="form-group">
+                            <label>@Localizer["SchoolLatitude"]</label>
+                            <input type="text" id="schoolLat" name="SchoolLatitude" value="@ViewBag.SchoolLatitude" placeholder="e.g. 30.0444">
+                        </div>
+                        <div class="form-group">
+                            <label>@Localizer["SchoolLongitude"]</label>
+                            <input type="text" id="schoolLng" name="SchoolLongitude" value="@ViewBag.SchoolLongitude" placeholder="e.g. 31.2357">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>@Localizer["AttendanceRangeMeters"]</label>
+                        <input type="number" id="attendanceRange" name="AttendanceRange" value="@ViewBag.AttendanceRange" placeholder="e.g. 100">
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+                        <button type="button" class="upload-btn" onclick="pinCurrentLocation()" style="background: #2ecc71;">
+                            <i class="fas fa-map-pin"></i> @Localizer["PinSchoolLocation"]
+                        </button>
+                        <p style="font-size: 13px; color: var(--text-gray); align-self: center; margin: 0;">
+                            @Localizer["PinLocationHelp"]
+                        </p>
+                    </div>
+
+                    <button type="button" class="save-btn" onclick="saveSystemSettings()">@Localizer["SaveSystemSettings"]</button>
+                </form>
+            </div>
+
+            <!-- Activity Logs Section -->
+            <div class="settings-section" id="activity-logs-section">
+                <div id="activityLogsContainer">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backups Section -->
+            <div class="settings-section" id="backups-section">
+                <div id="backupsContainer">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            // Hide all sections
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+
+            // Find and activate the correct tab
+            const tab = document.querySelector(`.settings-tab[data-tab="${tabName}"]`);
+            const section = document.getElementById(tabName + '-section');
+            
+            if (tab && section) {
+                tab.classList.add('active');
+                section.classList.add('active');
+                if (tabName === 'activity-logs') {
+                    loadActivityLogs();
+                } else if (tabName === 'backups') {
+                    loadBackups();
+                }
+            }
+        }
+
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabName = tab.getAttribute('data-tab');
+                switchTab(tabName);
+                
+                // Update URL without reload
+                const url = new URL(window.location);
+                url.searchParams.set('tab', tabName);
+                window.history.pushState({}, '', url);
+            });
+        });
+
+        // Handle initial tab from URL
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialTab = urlParams.get('tab') || 'profile';
+            switchTab(initialTab);
+        });
+
+        // Photo Upload Preview
+        document.getElementById('photoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatar = document.getElementById('profileAvatar');
+                    avatar.style.backgroundImage = `url(${e.target.result})`;
+                    avatar.style.backgroundSize = 'cover';
+                    avatar.style.backgroundPosition = 'center';
+                    avatar.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Language Select Implementation
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            var selectedLanguage = this.value;
+            
+            fetch('@Url.Action("UpdateLanguage", "Admin")', {
+                method: 'POST',
+                body: new URLSearchParams({ language: selectedLanguage }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the page to apply the language change
+                    location.reload(); 
+                }
+            });
+        });
+
+        // System Settings Support
+        function pinCurrentLocation() {
+            if (!navigator.geolocation) {
+                Swal.fire('Error', 'Geolocation not supported', 'error');
+                return;
+            }
+            
+            Swal.fire({
+                title: '@Localizer["GettingLocation"]',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            navigator.geolocation.getCurrentPosition((pos) => {
+                document.getElementById('schoolLat').value = pos.coords.latitude.toFixed(6);
+                document.getElementById('schoolLng').value = pos.coords.longitude.toFixed(6);
+                Swal.close();
+            }, (err) => {
+                Swal.fire('Error', 'Could not get location: ' + err.message, 'error');
+            });
+        }
+
+        async function saveSystemSettings() {
+            const lat = document.getElementById('schoolLat').value;
+            const lng = document.getElementById('schoolLng').value;
+            const range = document.getElementById('attendanceRange').value;
+
+            try {
+                const response = await fetch('/Admin/UpdateSystemSettings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('#systemSettingsForm input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `lat=${lat}&lng=${lng}&range=${range}`
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire('Success', data.message, 'success');
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            } catch (err) {
+                Swal.fire('Error', 'An unexpected error occurred', 'error');
+            }
+        }
+
+        // Activity Logs AJAX Loading
+        async function loadActivityLogs(queryString = '') {
+            const container = document.getElementById('activityLogsContainer');
+            
+            // If it's a new load (no query string), show loader
+            if (!queryString) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>`;
+            }
+
+            try {
+                const response = await fetch('/Admin/ActivityLogs' + (queryString ? '?' + queryString : ''), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const html = await response.text();
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading activity logs.</div>';
+            }
+        }
+
+        function resetLogsFilter() {
+            loadActivityLogs();
+        }
+
+        // Handle inner form submission for filtering without page reload
+        document.addEventListener('submit', function(e) {
+            if (e.target && e.target.id === 'activityFilterForm') {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const query = new URLSearchParams(formData).toString();
+                loadActivityLogs(query);
+            }
+        });
+
+        // Backup Management Functions
+        async function loadBackups() {
+            const container = document.getElementById('backupsContainer');
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>`;
+
+            try {
+                const response = await fetch('/Admin/ManageBackups');
+                const html = await response.text();
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading backup management.</div>';
+            }
+        }
+
+        async function triggerBackup(type) {
+            Swal.fire({
+                title: '@Localizer["GeneratingBackup"]',
+                text: '@Localizer["PleaseWaitWhileProcessFinishes"]',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const endpoint = type === 'Database' ? '/Admin/CreateDatabaseBackup' : '/Admin/CreateFilesBackup';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire('Success', data.message, 'success');
+                    loadBackups();
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            } catch (err) {
+                Swal.fire('Error', 'An unexpected error occurred', 'error');
+            }
+        }
+
+        async function deleteBackup(id) {
+            const result = await Swal.fire({
+                title: '@Localizer["AreYouSure"]',
+                text: '@Localizer["DeleteBackupWarning"]',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: '@Localizer["YesDeleteIt"]'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/Admin/DeleteBackup/' + id, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire('Deleted!', data.message, 'success');
+                        loadBackups();
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'An unexpected error occurred', 'error');
+                }
+            }
+        }
+    </script>
+}

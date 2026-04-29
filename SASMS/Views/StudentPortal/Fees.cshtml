@@ -1,0 +1,183 @@
+@model IEnumerable<SASMS.Models.FeeSubmission>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["GovernmentFees"];
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<style>
+    .fees-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    .fee-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid #eee;
+        transition: 0.3s;
+    }
+    .fee-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    .fee-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .fee-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    .fee-amount {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+    .fee-desc {
+        color: var(--text-gray);
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    .status-area {
+        border-top: 1px solid #f0f0f0;
+        padding-top: 20px;
+        margin-top: auto;
+    }
+    .upload-form {
+        display: none;
+        margin-top: 15px;
+    }
+</style>
+
+<div class="dashboard-header-modern">
+    <div class="stat-info">
+        <h3>@Localizer["GovernmentFees"]</h3>
+        <p>@Localizer["TrackAndSubmitGovernmentFees"]</p>
+    </div>
+</div>
+
+<div class="fees-grid">
+    @foreach (var submission in Model)
+    {
+        <div class="content-card" style="display: flex; flex-direction: column; justify-content: space-between; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #f0f0f0;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div>
+                        <div style="font-size: 18px; font-weight: 700; color: var(--text-dark);">@submission.GovernmentFee.Name</div>
+                        <div style="font-size: 12px; font-weight: 600; color: var(--primary); margin-top: 4px;">@submission.GovernmentFee.AcademicYear.Year</div>
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800; color: var(--primary);">@submission.GovernmentFee.Amount.ToString("C", new System.Globalization.CultureInfo("ar-EG"))</div>
+                </div>
+                <p style="color: var(--text-gray); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">@submission.GovernmentFee.Description</p>
+            </div>
+
+            <div style="border-top: 1px solid #f8f9fa; padding-top: 20px; margin-top: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <span style="font-size: 14px; font-weight: 600; color: var(--text-gray);">@Localizer["Status"]</span>
+                    @{
+                        string statusClass = "st-pending";
+                        if (submission.Status == "Approved") statusClass = "st-paid";
+                        if (submission.Status == "Rejected") statusClass = "st-overdue";
+                    }
+                    <span class="status-badge @statusClass">
+                        <span class="dot"></span>
+                        @Localizer[submission.Status]
+                    </span>
+                </div>
+
+                @if (submission.Status == "Rejected" && !string.IsNullOrEmpty(submission.RejectionReason))
+                {
+                    <div style="background: rgba(231, 76, 60, 0.05); border-left: 4px solid #e74c3c; border-radius: 8px; padding: 12px; margin-bottom: 20px; color: #e74c3c; font-size: 13px;">
+                        <i class="fas fa-exclamation-circle"></i> <strong>@Localizer["RejectionReason"]:</strong> @submission.RejectionReason
+                    </div>
+                }
+
+                @if (submission.Status == "PendingSubmission" || submission.Status == "Rejected")
+                {
+                    <button onclick="toggleUpload(@submission.Id)" class="form-btn" style="width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-upload"></i> @(submission.Status == "Rejected" ? Localizer["ResubmitReceipt"] : Localizer["SubmitReceipt"])
+                    </button>
+
+                    <div id="uploadForm-@submission.Id" class="upload-form" style="display: none; margin-top: 20px; background: #fcfcfd; padding: 15px; border-radius: 12px; border: 1px dashed #ddd;">
+                        <form onsubmit="handleUpload(event, @submission.Id)">
+                            @Html.AntiForgeryToken()
+                            <div style="margin-bottom: 12px;">
+                                <label style="font-size: 12px; font-weight: 600; color: var(--text-gray); display: block; margin-bottom: 5px;">@Localizer["ReceiptNumber"]</label>
+                                <input type="text" name="receiptNumber" class="form-input" style="padding: 10px 15px; font-size: 13px;" placeholder="@Localizer["EnterReceiptNumber"]" required />
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-size: 12px; font-weight: 600; color: var(--text-gray); display: block; margin-bottom: 5px;">@Localizer["ReceiptImage"]</label>
+                                <input type="file" name="receiptImage" class="form-input" style="padding: 8px; font-size: 13px;" accept="image/*" required />
+                            </div>
+                            <button type="submit" class="form-btn" style="width: 100%; background: #2ecc71; font-size: 13px;">
+                                @Localizer["ConfirmAndSend"]
+                            </button>
+                        </form>
+                    </div>
+                }
+                else if (submission.Status == "Submitted")
+                {
+                    <div style="text-align: center; color: var(--text-gray); font-size: 14px; background: #f8f9fa; padding: 12px; border-radius: 12px;">
+                        <i class="fas fa-spinner fa-spin" style="color: var(--primary);"></i> @Localizer["WaitingForReview"]
+                    </div>
+                }
+                else if (submission.Status == "Approved")
+                {
+                    <div style="text-align: center; color: #2ecc71; font-size: 14px; font-weight: 700; background: rgba(46, 204, 113, 0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(46, 204, 113, 0.1);">
+                        <i class="fas fa-check-double"></i> @Localizer["PaymentVerified"]
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleUpload(id) {
+            const form = document.getElementById('uploadForm-' + id);
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function handleUpload(event, id) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            formData.append('submissionId', id);
+
+            try {
+                const response = await fetch('@Url.Action("SubmitReceipt", "StudentPortal")', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    Swal.fire('@Html.Raw(Localizer["Error"])', 'Server error: ' + response.status, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire('@Html.Raw(Localizer["Success"])', data.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('@Html.Raw(Localizer["Error"])', data.message, 'error');
+                }
+            } catch (err) {
+                Swal.fire('@Html.Raw(Localizer["Error"])', err.message || 'An unexpected error occurred', 'error');
+            }
+        }
+    </script>
+}

@@ -1,0 +1,900 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Common -->
+  <data name="Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Student" xml:space="preserve">
+    <value>Student</value>
+  </data>
+  
+  <!-- Navigation -->
+  <data name="Admissions" xml:space="preserve">
+    <value>Admissions</value>
+  </data>
+  <data name="Students" xml:space="preserve">
+    <value>Students</value>
+  </data>
+  <data name="Staff" xml:space="preserve">
+    <value>Staff</value>
+  </data>
+  <data name="Attendance" xml:space="preserve">
+    <value>Attendance</value>
+  </data>
+  <data name="Fees" xml:space="preserve">
+    <value>Fees</value>
+  </data>
+  <data name="Complaints" xml:space="preserve">
+    <value>Complaints</value>
+  </data>
+  <data name="Activities" xml:space="preserve">
+    <value>Activities</value>
+  </data>
+  <data name="Messaging" xml:space="preserve">
+    <value>Messaging</value>
+  </data>
+  <data name="Reports" xml:space="preserve">
+    <value>Reports</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>MENU</value>
+  </data>
+  
+  <!-- Settings -->
+  <data name="Profile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ProfileSettings" xml:space="preserve">
+    <value>Profile Settings</value>
+  </data>
+  <data name="ManagePersonalInfo" xml:space="preserve">
+    <value>Manage your personal information and profile picture</value>
+  </data>
+  <data name="DarkMode" xml:space="preserve">
+    <value>Dark Mode</value>
+  </data>
+  <data name="DarkModeDesc" xml:space="preserve">
+    <value>Switch between light and dark theme</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Arabic" xml:space="preserve">
+    <value>العربية (Arabic)</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  
+  <!-- Student Portal -->
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>Welcome back</value>
+  </data>
+  <data name="AcademicOverview" xml:space="preserve">
+    <value>Here's an overview of your academic status.</value>
+  </data>
+  <data name="AttendanceRate" xml:space="preserve">
+    <value>Attendance Rate</value>
+  </data>
+  <data name="OutstandingFees" xml:space="preserve">
+    <value>Outstanding Fees</value>
+  </data>
+  <data name="ActiveActivities" xml:space="preserve">
+    <value>Active Activities</value>
+  </data>
+  <data name="CurrentClass" xml:space="preserve">
+    <value>Current Class</value>
+  </data>
+  <data name="QuickActions" xml:space="preserve">
+    <value>Quick Actions</value>
+  </data>
+  <data name="SubmitComplaint" xml:space="preserve">
+    <value>Submit Complaint</value>
+  </data>
+  <data name="MessageAdmin" xml:space="preserve">
+    <value>Message Admin</value>
+  </data>
+  <data name="BrowseActivities" xml:space="preserve">
+    <value>Browse Activities</value>
+  </data>
+  
+  <!-- Applications -->
+  <data name="Applications" xml:space="preserve">
+    <value>Applications</value>
+  </data>
+  <data name="AllStatus" xml:space="preserve">
+    <value>All Status</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="PendingReview" xml:space="preserve">
+    <value>Pending Review</value>
+  </data>
+  
+  <!-- Common Actions -->
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  
+  <!-- Status Messages -->
+  <data name="NoDataFound" xml:space="preserve">
+    <value>No data found.</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="SystemOverview" xml:space="preserve">
+    <value>System Overview</value>
+  </data>
+  <data name="NewStudents" xml:space="preserve">
+    <value>New Students</value>
+  </data>
+  <data name="ComplaintNotifications" xml:space="preserve">
+    <value>Complaint Notifications</value>
+  </data>
+  <data name="ComplaintNotificationDesc" xml:space="preserve">
+    <value>Receive notifications when students submit new complaints.</value>
+  </data>
+  <data name="ApplicationNotifications" xml:space="preserve">
+    <value>Admission Notifications</value>
+  </data>
+  <data name="ApplicationNotificationDesc" xml:space="preserve">
+    <value>Receive notifications for new student applications.</value>
+  </data>
+  <data name="MessageNotifications" xml:space="preserve">
+    <value>Chat Notifications</value>
+  </data>
+  <data name="MessageNotificationDesc" xml:space="preserve">
+    <value>Receive notifications for new messages in the chat.</value>
+  </data>
+  <data name="SystemUpdateNotifications" xml:space="preserve">
+    <value>System Notifications</value>
+  </data>
+  <data name="SystemUpdateNotificationDesc" xml:space="preserve">
+    <value>Receive notifications for system updates and reports.</value>
+  </data>
+  <data name="ComplaintUpdates" xml:space="preserve">
+    <value>Complaint Updates</value>
+  </data>
+  <data name="ComplaintUpdateNotificationDesc" xml:space="preserve">
+    <value>Receive notifications when your complaints are updated.</value>
+  </data>
+  <data name="SchoolAnnouncements" xml:space="preserve">
+    <value>School Announcements</value>
+  </data>
+  <data name="SchoolAnnouncementDesc" xml:space="preserve">
+    <value>Receive notifications about school events and announcements.</value>
+  </data>
+  <data name="ResetRequests" xml:space="preserve">
+    <value>Reset Requests</value>
+  </data>
+  <data name="RequestedAt" xml:space="preserve">
+    <value>Requested At</value>
+  </data>
+  <data name="ProcessResetRequest" xml:space="preserve">
+    <value>Process Reset Request</value>
+  </data>
+  <data name="ResetPasswordInstructions" xml:space="preserve">
+    <value>Set a new password for {0}. They will receive an email with these credentials.</value>
+  </data>
+  <data name="ApproveAndSend" xml:space="preserve">
+    <value>Approve &amp; Send Email</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="KeepItUp" xml:space="preserve">
+    <value>Keep it up!</value>
+  </data>
+  <data name="NoPendingDues" xml:space="preserve">
+    <value>No pending dues</value>
+  </data>
+  <data name="JoinMore" xml:space="preserve">
+    <value>Join more!</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Full Name</value>
+  </data>
+  <data name="EmailAddress" xml:space="preserve">
+    <value>Email Address</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Phone Number</value>
+  </data>
+  <data name="JobTitle" xml:space="preserve">
+    <value>Job Title</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Current Password</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="UpdatePassword" xml:space="preserve">
+    <value>Update Password</value>
+  </data>
+  <data name="NotificationPreferences" xml:space="preserve">
+    <value>Notification Preferences</value>
+  </data>
+   <data name="EmailNotifications" xml:space="preserve">
+    <value>Email Notifications</value>
+  </data>
+  <data name="Timezone" xml:space="preserve">
+    <value>Timezone</value>
+  </data>
+  <data name="UploadPhoto" xml:space="preserve">
+    <value>Upload Photo</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ProfilePicture" xml:space="preserve">
+    <value>Profile Picture</value>
+  </data>
+  <data name="SecuritySettings" xml:space="preserve">
+    <value>Security Settings</value>
+  </data>
+  <data name="ManageSecurity" xml:space="preserve">
+    <value>Manage your password and account security</value>
+  </data>
+  <data name="ControlNotifications" xml:space="preserve">
+    <value>Control how and when you receive notifications</value>
+  </data>
+  <data name="CustomizeAppearance" xml:space="preserve">
+    <value>Customize the look and feel of your dashboard</value>
+  </data>
+  <data name="StudentsDirectory" xml:space="preserve">
+    <value>Students Directory</value>
+  </data>
+  <data name="DeleteSelected" xml:space="preserve">
+    <value>Delete Selected</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search by Name, ID, or Phone</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="AddStudent" xml:space="preserve">
+    <value>Add Student</value>
+  </data>
+  <data name="GuardianContact" xml:space="preserve">
+    <value>Guardian Contact</value>
+  </data>
+  <data name="DateJoined" xml:space="preserve">
+    <value>Date Joined</value>
+  </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Confirm Delete</value>
+  </data>
+  <data name="DeleteConfirmationFull" xml:space="preserve">
+    <value>Are you sure you want to delete this student?</value>
+  </data>
+  <data name="DeleteWarning" xml:space="preserve">
+    <value>This action cannot be undone and will delete the student's user account.</value>
+  </data>
+  <data name="BulkDeleteConfirmation" xml:space="preserve">
+    <value>Are you sure you want to delete the selected students?</value>
+  </data>
+
+  <data name="AppNumber" xml:space="preserve">
+    <value>App Number</value>
+  </data>
+  <data name="Applicant" xml:space="preserve">
+    <value>Applicant</value>
+  </data>
+  <data name="Grade" xml:space="preserve">
+    <value>Grade</value>
+  </data>
+  <data name="PreferredDept" xml:space="preserve">
+    <value>Preferred Dept</value>
+  </data>
+  <data name="Score" xml:space="preserve">
+    <value>Score</value>
+  </data>
+  <data name="Eligibility" xml:space="preserve">
+    <value>Eligibility</value>
+  </data>
+  <data name="Submitted" xml:space="preserve">
+    <value>Submitted</value>
+  </data>
+  <data name="Eligible" xml:space="preserve">
+    <value>Eligible</value>
+  </data>
+  <data name="NotEligible" xml:space="preserve">
+    <value>Not Eligible</value>
+  </data>
+  <data name="NoApplicationsFound" xml:space="preserve">
+    <value>No applications found.</value>
+  </data>
+  <data name="ConfirmDeleteSelected" xml:space="preserve">
+    <value>Are you sure you want to delete the selected applications?</value>
+  </data>
+  <data name="AreYouSure" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="NewMessageReceived" xml:space="preserve">
+    <value>New Message Received</value>
+  </data>
+  <data name="SearchPeople" xml:space="preserve">
+    <value>Search people...</value>
+  </data>
+  <data name="StartConversation" xml:space="preserve">
+    <value>Start a conversation</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="TypeMessage" xml:space="preserve">
+    <value>Type a message...</value>
+  </data>
+  <data name="SelectConversation" xml:space="preserve">
+    <value>Select a conversation to start messaging</value>
+  </data>
+  <data name="SchoolActivities" xml:space="preserve">
+    <value>School Activities</value>
+  </data>
+  <data name="Upcoming" xml:space="preserve">
+    <value>Upcoming</value>
+  </data>
+  <data name="Ongoing" xml:space="preserve">
+    <value>Ongoing</value>
+  </data>
+  <data name="NewActivity" xml:space="preserve">
+    <value>New Activity</value>
+  </data>
+  <data name="UpcomingActivities" xml:space="preserve">
+    <value>Upcoming Activities</value>
+  </data>
+  <data name="OngoingActivities" xml:space="preserve">
+    <value>Ongoing Activities</value>
+  </data>
+  <data name="Participants" xml:space="preserve">
+    <value>Participants</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="NoActivitiesFound" xml:space="preserve">
+    <value>No activities found</value>
+  </data>
+  <data name="AddNewActivity" xml:space="preserve">
+    <value>Add New Activity</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to List</value>
+  </data>
+  <data name="ActivityTitle" xml:space="preserve">
+    <value>Activity Title</value>
+  </data>
+  <data name="EnterActivityTitle" xml:space="preserve">
+    <value>Enter Activity Title</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="EnterActivityDescription" xml:space="preserve">
+    <value>Enter Activity Description</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Sports" xml:space="preserve">
+    <value>Sports</value>
+  </data>
+  <data name="Arts" xml:space="preserve">
+    <value>Arts</value>
+  </data>
+  <data name="Technology" xml:space="preserve">
+    <value>Technology</value>
+  </data>
+  <data name="Academic" xml:space="preserve">
+    <value>Academic</value>
+  </data>
+  <data name="Social" xml:space="preserve">
+    <value>Social</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="EnterLocation" xml:space="preserve">
+    <value>Enter Location</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Capacity" xml:space="preserve">
+    <value>Capacity</value>
+  </data>
+  <data name="Fee" xml:space="preserve">
+    <value>Fee</value>
+  </data>
+  <data name="CreateActivity" xml:space="preserve">
+    <value>Create Activity</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Start Time</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>End Time</value>
+  </data>
+  <data name="RequiresRegistration" xml:space="preserve">
+    <value>Requires Registration</value>
+  </data>
+  <data name="RegistrationDeadline" xml:space="preserve">
+    <value>Registration Deadline</value>
+  </data>
+  <data name="Requirements" xml:space="preserve">
+    <value>Requirements</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="EnterRequirements" xml:space="preserve">
+    <value>Enter special requirements or notes</value>
+  </data>
+  <data name="ActivityImage" xml:space="preserve">
+    <value>Activity Image</value>
+  </data>
+  <data name="UploadImage" xml:space="preserve">
+    <value>Upload Image</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ActivityDetails" xml:space="preserve">
+    <value>Activity Details</value>
+  </data>
+  <data name="SelectImage" xml:space="preserve">
+    <value>Select Image</value>
+  </data>
+  <data name="Organizer" xml:space="preserve">
+    <value>Organizer</value>
+  </data>
+  <data name="RegisterNow" xml:space="preserve">
+    <value>Register Now</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="EditActivity" xml:space="preserve">
+    <value>Edit Activity</value>
+  </data>
+  <data name="DeleteActivity" xml:space="preserve">
+    <value>Delete Activity</value>
+  </data>
+  <data name="DeleteConfirmationText" xml:space="preserve">
+    <value>Are you sure you want to delete this activity? This action cannot be undone.</value>
+  </data>
+  <data name="ChangeImage" xml:space="preserve">
+    <value>Change Image</value>
+  </data>
+  <data name="AlreadyRegistered" xml:space="preserve">
+    <value>Already Registered</value>
+  </data>
+  <data name="RegistrationFull" xml:space="preserve">
+    <value>Registration Full</value>
+  </data>
+  <data name="RegistrationClosed" xml:space="preserve">
+    <value>Registration Closed</value>
+  </data>
+  <data name="RegistrationOpen" xml:space="preserve">
+    <value>Registration Open</value>
+  </data>
+  <data name="ViewLocation" xml:space="preserve">
+    <value>View Location</value>
+  </data>
+  <data name="AttachFiles" xml:space="preserve">
+    <value>Attach Files</value>
+  </data>
+  <data name="ShareLocation" xml:space="preserve">
+    <value>Share Location</value>
+  </data>
+  <data name="FilesSelected" xml:space="preserve">
+    <value>files selected</value>
+  </data>
+  <data name="LocationError" xml:space="preserve">
+    <value>Error getting location</value>
+  </data>
+  <data name="LocationNotSupported" xml:space="preserve">
+    <value>Geolocation is not supported by this browser.</value>
+  </data>
+  <data name="Locating" xml:space="preserve">
+    <value>Locating</value>
+  </data>
+  <data name="LocationFound" xml:space="preserve">
+    <value>Location found</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Sending</value>
+  </data>
+  <data name="LocationDenied" xml:space="preserve">
+    <value>Location permission denied.</value>
+  </data>
+  <data name="LocationTimeout" xml:space="preserve">
+    <value>Location request timed out.</value>
+  </data>
+  <data name="MicrophoneAccessDenied" xml:space="preserve">
+    <value>Microphone access denied</value>
+  </data>
+  <data name="AudioNotSupported" xml:space="preserve">
+    <value>Audio recording is not supported in this browser</value>
+  </data>
+  <data name="RecordingVoiceMessage" xml:space="preserve">
+    <value>Recording voice message</value>
+  </data>
+  <data name="RecordVoiceMessage" xml:space="preserve">
+    <value>Record Voice Message</value>
+  </data>
+  <data name="SendingVoiceMessage" xml:space="preserve">
+    <value>Sending voice message</value>
+  </data>
+  <data name="System" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="SystemSettings" xml:space="preserve">
+    <value>System Settings</value>
+  </data>
+  <data name="ConfigureSchoolLocation" xml:space="preserve">
+    <value>Configure School Location</value>
+  </data>
+  <data name="SchoolLatitude" xml:space="preserve">
+    <value>School Latitude</value>
+  </data>
+  <data name="SchoolLongitude" xml:space="preserve">
+    <value>School Longitude</value>
+  </data>
+  <data name="AttendanceRangeMeters" xml:space="preserve">
+    <value>Attendance Range (Meters)</value>
+  </data>
+  <data name="PinSchoolLocation" xml:space="preserve">
+    <value>Pin School Location</value>
+  </data>
+  <data name="PinLocationHelp" xml:space="preserve">
+    <value>Use your current location to automatically set coordinates.</value>
+  </data>
+  <data name="SaveSystemSettings" xml:space="preserve">
+    <value>Save System Settings</value>
+  </data>
+  <data name="GettingLocation" xml:space="preserve">
+    <value>Getting Location...</value>
+  </data>
+  <data name="GovernmentFees" xml:space="preserve">
+    <value>Government Fees</value>
+  </data>
+  <data name="GovernmentFeesManagement" xml:space="preserve">
+    <value>Government Fees Management</value>
+  </data>
+  <data name="ManageGovernmentFeeCategories" xml:space="preserve">
+    <value>Manage and define government fee categories.</value>
+  </data>
+  <data name="AddNewFee" xml:space="preserve">
+    <value>Add New Fee</value>
+  </data>
+  <data name="FeeName" xml:space="preserve">
+    <value>Fee Name</value>
+  </data>
+  <data name="GenerateForAllStudents" xml:space="preserve">
+    <value>Generate for all students</value>
+  </data>
+  <data name="ViewSubmissions" xml:space="preserve">
+    <value>View Submissions</value>
+  </data>
+  <data name="GenerateSubmissionsConfirm" xml:space="preserve">
+    <value>This will create record for all students who hasn't submitted yet.</value>
+  </data>
+  <data name="YesGenerate" xml:space="preserve">
+    <value>Yes, Generate</value>
+  </data>
+  <data name="SubmissionsGenerated" xml:space="preserve">
+    <value>Submissions generated successfully.</value>
+  </data>
+  <data name="DefineNewGovernmentFee" xml:space="preserve">
+    <value>Define a new government fee type.</value>
+  </data>
+
+  <data name="SelectAcademicYear" xml:space="preserve">
+    <value>Select Academic Year</value>
+  </data>
+  <data name="SaveFee" xml:space="preserve">
+    <value>Save Fee</value>
+  </data>
+
+  <data name="GovernmentFeeSubmissions" xml:space="preserve">
+    <value>Government Fee Submissions</value>
+  </data>
+  <data name="ReviewStudentReceipts" xml:space="preserve">
+    <value>Review and verify student payment receipts.</value>
+  </data>
+
+  <data name="PendingSubmission" xml:space="preserve">
+    <value>Pending Submission</value>
+  </data>
+  <data name="ReceiptNumber" xml:space="preserve">
+    <value>Receipt Number</value>
+  </data>
+  <data name="ReceiptImage" xml:space="preserve">
+    <value>Receipt Image</value>
+  </data>
+  <data name="EnterReasonPlaceholder" xml:space="preserve">
+    <value>Please enter the reason for rejection...</value>
+  </data>
+  <data name="ConfirmReject" xml:space="preserve">
+    <value>Confirm Reject</value>
+  </data>
+  <data name="ApproveSubmission" xml:space="preserve">
+    <value>Approve Submission</value>
+  </data>
+  <data name="YesApprove" xml:space="preserve">
+    <value>Yes, Approve</value>
+  </data>
+  <data name="StatusUpdated" xml:space="preserve">
+    <value>Status updated successfully.</value>
+  </data>
+  <data name="TrackAndSubmitGovernmentFees" xml:space="preserve">
+    <value>Track and submit your government fee receipts here.</value>
+  </data>
+  <data name="ResubmitReceipt" xml:space="preserve">
+    <value>Resubmit Receipt</value>
+  </data>
+  <data name="SubmitReceipt" xml:space="preserve">
+    <value>Submit Receipt</value>
+  </data>
+  <data name="EnterReceiptNumber" xml:space="preserve">
+    <value>Enter receipt number</value>
+  </data>
+  <data name="ConfirmAndSend" xml:space="preserve">
+    <value>Confirm and Send</value>
+  </data>
+  <data name="WaitingForReview" xml:space="preserve">
+    <value>Waiting for review...</value>
+  </data>
+  <data name="PaymentVerified" xml:space="preserve">
+    <value>Payment Verified</value>
+  </data>
+  <data name="ReportsAndAnalytics" xml:space="preserve">
+    <value>Reports &amp; Analytics</value>
+  </data>
+  <data name="ReportsDesc" xml:space="preserve">
+    <value>View detailed reports and insights across all system modules.</value>
+  </data>
+  <data name="ExportAll" xml:space="preserve">
+    <value>Export Full Report</value>
+  </data>
+  <data name="Financial" xml:space="preserve">
+    <value>Financial</value>
+  </data>
+  <data name="RevenueTrend" xml:space="preserve">
+    <value>Revenue Trend (Last 6 Months)</value>
+  </data>
+  <data name="FeeDistribution" xml:space="preserve">
+    <value>Fee Type Distribution</value>
+  </data>
+  <data name="ApplicationStatus" xml:space="preserve">
+    <value>Application Status Distribution</value>
+  </data>
+  <data name="DepartmentApplications" xml:space="preserve">
+    <value>Applications by Department</value>
+  </data>
+  <data name="TotalStudents" xml:space="preserve">
+    <value>Total Students</value>
+  </data>
+  <data name="ActiveStudents" xml:space="preserve">
+    <value>Active Students</value>
+  </data>
+  <data name="Graduated" xml:space="preserve">
+    <value>Graduated</value>
+  </data>
+  <data name="GenderDistribution" xml:space="preserve">
+    <value>Gender Distribution</value>
+  </data>
+  <data name="DistributionByDepartment" xml:space="preserve">
+    <value>Student Distribution by Department</value>
+  </data>
+  <data name="OverallAttendance" xml:space="preserve">
+    <value>Overall Attendance Overview</value>
+  </data>
+  <data name="AttendanceMetrics" xml:space="preserve">
+    <value>Detailed Attendance Metrics</value>
+  </data>
+  <data name="PaymentsHistory" xml:space="preserve">
+    <value>Payment History</value>
+  </data>
+  <data name="FeeSubmissions" xml:space="preserve">
+    <value>Fee Submission Trends</value>
+  </data>
+  <data name="ComplaintStatus" xml:space="preserve">
+    <value>Complaint Resolution Status</value>
+  </data>
+  <data name="ComplaintCategories" xml:space="preserve">
+    <value>Complaints by Category</value>
+  </data>
+  <data name="ActivityParticipation" xml:space="preserve">
+    <value>Top Activities by Participation</value>
+  </data>
+  <data name="ActivityCategories" xml:space="preserve">
+    <value>Activities by Category</value>
+  </data>
+  <data name="PasswordResetStatus" xml:space="preserve">
+    <value>Password Reset Request Status</value>
+  </data>
+  <data name="Revenue" xml:space="preserve">
+    <value>Revenue</value>
+  </data>
+  <data name="StudentsPerDept" xml:space="preserve">
+    <value>Students per Department</value>
+  </data>
+  <data name="Suggestions" xml:space="preserve">
+    <value>Suggestions</value>
+  </data>
+  <data name="SubmitSuggestion" xml:space="preserve">
+    <value>Submit Suggestion</value>
+  </data>
+  <data name="SuggestionDate" xml:space="preserve">
+    <value>Suggestion Date</value>
+  </data>
+  <data name="UnderReview" xml:space="preserve">
+    <value>Under Review</value>
+  </data>
+  <data name="Implemented" xml:space="preserve">
+    <value>Implemented</value>
+  </data>
+  <data name="AnonymousSuggestion" xml:space="preserve">
+    <value>Anonymous Suggestion</value>
+  </data>
+  <data name="Upvotes" xml:space="preserve">
+    <value>Upvotes</value>
+  </data>
+  <data name="SuggestionTitle" xml:space="preserve">
+    <value>Suggestion Title</value>
+  </data>
+  <data name="SuggestionDetails" xml:space="preserve">
+    <value>Suggestion Details</value>
+  </data>
+  <data name="NewSuggestion" xml:space="preserve">
+    <value>New Suggestion</value>
+  </data>
+  <data name="EditSuggestion" xml:space="preserve">
+    <value>Edit Suggestion</value>
+  </data>
+  <data name="SupervisionOverview" xml:space="preserve">
+    <value>Supervision Overview</value>
+  </data>
+  <data name="ActivityPerformance" xml:space="preserve">
+    <value>Activity Performance</value>
+  </data>
+  <data name="UnresolvedComplaints" xml:space="preserve">
+    <value>Unresolved Complaints</value>
+  </data>
+  <data name="HighPriority" xml:space="preserve">
+    <value>High Priority</value>
+  </data>
+  <data name="NewSuggestions" xml:space="preserve">
+    <value>New Suggestions</value>
+  </data>
+  <data name="ReviewNeeded" xml:space="preserve">
+    <value>Review Needed</value>
+  </data>
+  <data name="SystemAlerts" xml:space="preserve">
+    <value>System Alerts</value>
+  </data>
+  <data name="AllSystemsNormal" xml:space="preserve">
+    <value>All Systems Normal</value>
+  </data>
+  <data name="ManagedActivities" xml:space="preserve">
+    <value>Managed Activities</value>
+  </data>
+  <data name="TotalParticipants" xml:space="preserve">
+    <value>Total Participants</value>
+  </data>
+  <data name="AcrossAllActivities" xml:space="preserve">
+    <value>Across All Activities</value>
+  </data>
+  <data name="NewJoiners" xml:space="preserve">
+    <value>New Joiners</value>
+  </data>
+  <data name="AverageAttendance" xml:space="preserve">
+    <value>Average Attendance</value>
+  </data>
+  <data name="AboveTarget" xml:space="preserve">
+    <value>Above Target</value>
+  </data>
+  <data name="ActivityParticipants" xml:space="preserve">
+    <value>Activity Participants</value>
+  </data>
+  <data name="Suggestions" xml:space="preserve">
+    <value>Suggestions</value>
+  </data>
+  <data name="AttentionRequired" xml:space="preserve">
+    <value>Attention Required</value>
+  </data>
+</root>

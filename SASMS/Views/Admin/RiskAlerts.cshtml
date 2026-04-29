@@ -1,0 +1,342 @@
+@using SASMS.Models
+@model IEnumerable<RiskAlert>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@inject Microsoft.Extensions.Localization.IStringLocalizer<SharedResources> SharedLocalizer
+
+@{
+    ViewData["Title"] = Localizer["Risk Detection System"];
+    Layout = "_AdminLayout";
+}
+
+<div class="risk-page-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1 class="page-title" style="margin-bottom: 5px;">@Localizer["Risk Detection & Alerts"]</h1>
+            <p style="color: var(--text-gray); font-size: 14px;">@Localizer["Monitor and resolve critical system risks and student flags."]</p>
+        </div>
+        <button onclick="triggerScan()" class="save-btn" id="scanBtn" style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-sync-alt"></i>
+            <span>@Localizer["Run Manual Scan"]</span>
+        </button>
+    </div>
+
+    <!-- Filters Sidebar-like header -->
+    <div class="content-card" style="margin-bottom: 30px; padding: 20px;">
+        <form method="get" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <div class="table-search" style="flex: 1; min-width: 250px;">
+                <i class="fas fa-search"></i>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="@Localizer["Search by student or message..."]">
+            </div>
+            
+            <div style="min-width: 200px;">
+                <select name="type" class="filter-btn" style="width: 100%; border: none; appearance: none; -webkit-appearance: none; cursor: pointer;">
+                    <option value="">@Localizer["All Risk Types"]</option>
+                    <option value="Attendance" selected="@(ViewBag.SelectedType == "Attendance")">@Localizer["Attendance Issues"]</option>
+                    <option value="Financial" selected="@(ViewBag.SelectedType == "Financial")">@Localizer["Financial Risks"]</option>
+                    <option value="Application" selected="@(ViewBag.SelectedType == "Application")">@Localizer["Application Errors"]</option>
+                    <option value="Complaint" selected="@(ViewBag.SelectedType == "Complaint")">@Localizer["Stagnant Complaints"]</option>
+                </select>
+            </div>
+
+            <button type="submit" class="save-btn" style="padding: 10px 25px;">@Localizer["Filter"]</button>
+            
+            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm) || !string.IsNullOrEmpty(ViewBag.SelectedType))
+            {
+                <a href="@Url.Action("RiskAlerts")" class="filter-btn" style="text-decoration: none;">@Localizer["Reset"]</a>
+            }
+        </form>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="content-card" style="text-align: center; padding: 80px 20px;">
+            <div class="empty-state-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 style="color: var(--text-dark); font-weight: 700; margin-top: 24px;">@Localizer["System secure!"]</h2>
+            <p style="color: var(--text-gray); font-size: 16px; margin-top: 10px;">@Localizer["No unresolved critical risks detected at this moment."]</p>
+        </div>
+    }
+    else
+    {
+        <div class="risk-grid">
+            @foreach (var alert in Model)
+            {
+                <div class="risk-card-item risk-border-@alert.Type.ToLower()" id="alert-card-@alert.Id">
+                    <div class="risk-card-header">
+                        <span class="badge-risk-@alert.Type.ToLower()">
+                            <i class="@GetIcon(alert.Type)"></i> @Localizer[alert.Type]
+                        </span>
+                        <span style="color: var(--text-gray); font-size: 12px;">@alert.CreatedAt.ToString("MMM dd, HH:mm")</span>
+                    </div>
+                    
+                    <h3 class="risk-message">@alert.Message</h3>
+                    
+                    @if (alert.Student != null)
+                    {
+                        <div class="student-info-pill">
+                            <div class="student-avatar">
+                                @if (!string.IsNullOrEmpty(alert.Student.ProfilePicturePath))
+                                {
+                                    <img src="@alert.Student.ProfilePicturePath" alt="">
+                                }
+                                else
+                                {
+                                    <span>@alert.Student.User.Name[0]</span>
+                                }
+                            </div>
+                            <div class="student-meta">
+                                <div class="name">@alert.Student.User.Name</div>
+                                <div class="sid">ID: @alert.Student.StudentId</div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="risk-card-actions">
+                        <button onclick="resolveAlert(@alert.Id)" class="resolve-btn">
+                            <i class="fas fa-check-circle"></i> @Localizer["Mark Resolved"]
+                        </button>
+                        @if (alert.StudentId.HasValue)
+                        {
+                            <a href="/Student/Details/@alert.StudentId" class="view-btn">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .risk-page-container {
+            max-width: 1200px;
+        }
+
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .risk-card-item {
+            background: var(--bg-surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            border-left: 5px solid transparent;
+            transition: 0.3s;
+        }
+
+        .risk-card-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Border colors per type */
+        .risk-border-attendance { border-left-color: var(--status-overdue-text); }
+        .risk-border-financial { border-left-color: var(--accent-orange); }
+        .risk-border-application { border-left-color: var(--status-paid-text); }
+        .risk-border-complaint { border-left-color: var(--primary); }
+
+        .risk-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Badge styles */
+        [class^="badge-risk-"] {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-risk-attendance { background: var(--status-overdue-bg); color: var(--status-overdue-text); }
+        .badge-risk-financial { background: var(--status-pending-bg); color: var(--accent-orange); }
+        .badge-risk-application { background: var(--status-paid-bg); color: var(--status-paid-text); }
+        .badge-risk-complaint { background: var(--primary-light); color: var(--primary); }
+
+        .risk-message {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.4;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .student-info-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-body);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .student-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .student-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .student-meta .name { font-weight: 700; font-size: 14px; color: var(--text-dark); }
+        .student-meta .sid { font-size: 11px; color: var(--text-gray); }
+
+        .risk-card-actions {
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 20px;
+        }
+
+        .resolve-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            flex-grow: 1;
+            transition: 0.2s;
+        }
+
+        .resolve-btn:hover { background: #43A047; transform: translateY(-2px); }
+
+        .view-btn {
+            background: var(--primary-light);
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .view-btn:hover { background: var(--primary); color: white; }
+
+        .empty-state-icon {
+            width: 100px;
+            height: 100px;
+            background: #E8F5E9;
+            color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto;
+        }
+
+        /* Dark Mode adjustments */
+        body.dark-mode .risk-card-item { background: #1E1E1E; }
+        body.dark-mode .student-info-pill { background: #252525; }
+        body.dark-mode .empty-state-icon { background: #1B2E1D; color: #4CAF50; }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        async function triggerScan() {
+            const btn = document.getElementById('scanBtn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> @Localizer["Processing"]...';
+
+            try {
+                const response = await fetch('/Admin/TriggerRiskDetection', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '@Localizer["Scan Successful"]',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Failed to run detection scan.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        async function resolveAlert(id) {
+            const result = await Swal.fire({
+                title: '@Localizer["Confirm Resolution"]',
+                text: '@Localizer["ResolveAlertConfirmText"]',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4CAF50',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '@Localizer["YesResolve"]'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/Admin/ResolveRiskAlert/' + id, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const card = document.getElementById('alert-card-' + id);
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.remove();
+                            if (document.querySelectorAll('.risk-card-item').length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                    }
+                } catch (e) {
+                    Swal.fire('Error', 'Failed to resolve alert.', 'error');
+                }
+            }
+        }
+    </script>
+}
+
+@functions {
+    string GetIcon(string type) => type switch {
+        "Attendance" => "fas fa-user-clock",
+        "Financial" => "fas fa-file-invoice-dollar",
+        "Application" => "fas fa-file-signature",
+        "Complaint" => "fas fa-comment-exclamation",
+        _ => "fas fa-exclamation-triangle"
+    };
+}

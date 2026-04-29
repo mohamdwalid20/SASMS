@@ -1,0 +1,51 @@
+@model IEnumerable<SASMS.Models.ActivityLog>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["ActivityLogs"];
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-container mt-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <partial name="_ActivityLogsPartial" model="Model" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Use the same logic for filtering inside the full view if accessed directly
+        async function loadActivityLogs(queryString = '') {
+            if (!queryString) {
+                location.reload(); // Fallback for full page refresh
+                return;
+            }
+            const container = document.querySelector('.activity-logs-partial').parentElement;
+            try {
+                const response = await fetch('/Admin/ActivityLogs?' + queryString, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                container.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function resetLogsFilter() {
+            location.href = '@Url.Action("ActivityLogs")';
+        }
+
+        document.addEventListener('submit', function(e) {
+            if (e.target && e.target.id === 'activityFilterForm') {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const query = new URLSearchParams(formData).toString();
+                loadActivityLogs(query);
+            }
+        });
+    </script>
+}

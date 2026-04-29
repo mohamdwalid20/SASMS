@@ -1,0 +1,249 @@
+/* RTL (Right-to-Left) Support for Arabic Language */
+
+html[lang="ar"] {
+    direction: rtl;
+}
+
+html[lang="ar"] body {
+    text-align: right;
+}
+
+/* Sidebar RTL */
+html[lang="ar"] .sidebar {
+    left: auto;
+    right: 0;
+}
+
+html[lang="ar"] .main-wrapper {
+    margin-left: 0;
+    margin-right: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    min-width: calc(100% - var(--sidebar-width));
+}
+
+/* Navigation Icons RTL */
+html[lang="ar"] .nav-link {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .brand {
+    flex-direction: row-reverse;
+}
+
+/* Header RTL */
+html[lang="ar"] .top-header {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .header-right {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+html[lang="ar"] .profile-pill {
+    flex-direction: row-reverse;
+}
+
+/* Tables RTL */
+html[lang="ar"] table {
+    direction: rtl;
+}
+
+html[lang="ar"] .custom-table th,
+html[lang="ar"] .custom-table td {
+    text-align: right;
+}
+
+html[lang="ar"] .user-cell {
+    flex-direction: row-reverse;
+}
+
+/* Forms RTL */
+html[lang="ar"] .form-group input,
+html[lang="ar"] .form-group select,
+html[lang="ar"] .form-group textarea {
+    text-align: right;
+}
+
+/* Cards RTL */
+html[lang="ar"] .stat-card,
+html[lang="ar"] .metric-card,
+html[lang="ar"] .content-card {
+    direction: rtl;
+}
+
+html[lang="ar"] .stat-icon {
+    right: auto !important;
+    left: 24px !important;
+}
+
+/* Buttons and Actions RTL */
+html[lang="ar"] .action-btn {
+    margin-left: 0;
+    margin-right: 8px;
+}
+
+html[lang="ar"] .form-btn i {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+/* Dashboard Grid RTL */
+html[lang="ar"] .stats-grid,
+html[lang="ar"] .dashboard-grid {
+    direction: rtl;
+}
+
+/* Settings Sidebar RTL */
+/* grid-template-columns is handled by direction: rtl automatically mirroring the 240px 1fr layout */
+
+html[lang="ar"] .settings-tab i {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+/* Messaging RTL */
+html[lang="ar"] .msg-bubble-content {
+    text-align: right;
+}
+
+html[lang="ar"] .message-item-full.sent {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .message-item-full.received {
+    flex-direction: row;
+}
+
+/* Dropdowns RTL */
+html[lang="ar"] .dropdown-btn {
+    text-align: right;
+}
+
+/* Filter Bar RTL */
+html[lang="ar"] .filter-bar {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .search-filter {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .search-filter i {
+    left: auto;
+    right: 12px;
+}
+
+html[lang="ar"] .search-filter input {
+    padding-left: 16px;
+    padding-right: 36px;
+}
+
+/* Notification Dropdown RTL */
+html[lang="ar"] #notificationDropdown {
+    left: 0 !important;
+    right: auto !important;
+}
+
+/* Progress Tracker RTL (for Applicant Status) */
+html[lang="ar"] .progress-track {
+    flex-direction: row-reverse;
+}
+
+/* Icon Positions RTL */
+html[lang="ar"] i.fa,
+html[lang="ar"] i.fas,
+html[lang="ar"] i.far {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+/* Flex Reverse for RTL */
+html[lang="ar"] .dashboard-header-modern {
+    flex-direction: row-reverse;
+}
+
+/* Two Column Layouts RTL */
+html[lang="ar"] .two-col {
+    direction: rtl;
+}
+
+/* Status Badges RTL */
+html[lang="ar"] .status-badge {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .status-badge .dot {
+    margin-right: 0;
+    margin-left: 6px;
+}
+
+/* Breadcrumbs RTL */
+html[lang="ar"] .breadcrumb {
+    flex-direction: row-reverse;
+}
+
+/* Pagination RTL */
+html[lang="ar"] .pagination {
+    flex-direction: row-reverse;
+}
+
+/* Modal RTL */
+html[lang="ar"] .modal-content {
+    text-align: right;
+}
+
+/* Profile Upload RTL */
+html[lang="ar"] .profile-upload {
+    flex-direction: row-reverse;
+}
+
+/* Recent Activities RTL */
+html[lang="ar"] .activity-item {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .activity-icon {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+/* Chart Labels - Keep LTR for numbers */
+html[lang="ar"] .chart-label {
+    direction: ltr;
+}
+
+/* ============================
+   RTL MOBILE RESPONSIVE
+   ============================ */
+@media (max-width: 768px) {
+
+    /* Sidebar slides from RIGHT in RTL */
+    html[lang="ar"] .sidebar {
+        left: auto;
+        right: 0;
+        transform: translateX(100%);
+    }
+
+    html[lang="ar"] body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    /* Main wrapper: no right margin on mobile */
+    html[lang="ar"] .main-wrapper {
+        margin-right: 0;
+        margin-left: 0;
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Filter bar stacks in RTL too */
+    html[lang="ar"] .filter-bar {
+        flex-direction: column;
+    }
+
+    /* Table header stacks */
+    html[lang="ar"] .table-header {
+        align-items: flex-end;
+    }
+}

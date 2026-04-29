@@ -1,0 +1,93 @@
+@model IEnumerable<SASMS.Models.DynamicField>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Form Field Management"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["Dynamic Application Fields"]</h3>
+        
+        <div class="filter-bar">
+            <a href="@Url.Action("Create", "DynamicField")" class="dropdown-btn" style="background: var(--primary); color: white;">
+                <i class="fas fa-plus"></i> @Localizer["AddNew"]
+            </a>
+        </div>
+    </div>
+
+
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>@Localizer["Display Order"]</th>
+                <th>@Localizer["Label"]</th>
+                <th>@Localizer["Section"]</th>
+                <th>@Localizer["Type"]</th>
+                <th>@Localizer["Required"]</th>
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["Actions"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td>@item.DisplayOrder</td>
+                    <td>
+                        <strong>@item.Label</strong><br/>
+                        <small style="color: #A098AE;">@item.FieldName</small>
+                    </td>
+                    <td><span class="badge" style="background: #E8F0FE; color: #1a73e8; padding: 4px 10px; border-radius: 20px; font-size: 12px;">@item.Section</span></td>
+                    <td>@item.Type</td>
+                    <td>
+                        @if (item.IsRequired)
+                        {
+                            <span style="color: #FF5252;"><i class="fas fa-check-circle"></i> @Localizer["Yes"]</span>
+                        }
+                        else
+                        {
+                            <span style="color: #A098AE;"><i class="fas fa-times-circle"></i> @Localizer["No"]</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span class="status-pill status-active">@Localizer["Active"]</span>
+                        }
+                        else
+                        {
+                            <span class="status-pill status-absent">@Localizer["Inactive"]</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Edit", "DynamicField", new { id = item.Id })" class="action-btn"><i class="far fa-edit"></i></a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" 
+                                      onsubmit="confirmAction(event, this)"
+                                      data-confirm-title='@Localizer["AreYouSure"]'
+                                      data-confirm-text='@Localizer["DeleteFieldConfirm"]'>
+                             <button type="submit" class="action-btn" style="color: #FF5252;"><i class="far fa-trash-alt"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+     @if (!Model.Any()) {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoDynamicFields"]</div>
+    }
+</div>
+
+<style>
+    .status-pill {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .status-active { background: #E6F4EA; color: #1E7E34; }
+    .status-absent { background: #FCE8E6; color: #C5221F; }
+</style>

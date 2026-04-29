@@ -1,0 +1,198 @@
+@model IEnumerable<SASMS.Models.Attendance>
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["MyAttendance"];
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="dashboard-header-modern">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <h1 class="page-title">@Localizer["AttendanceRecord"]</h1>
+            <p class="page-subtitle">@Localizer["AttendanceSubtitle"]</p>
+        </div>
+        
+        <div class="attendance-action">
+            @if (ViewBag.AlreadyCheckedIn == false)
+            {
+                <button id="checkInBtn" class="btn-primary" onclick="handleCheckIn()" style="padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(77, 68, 181, 0.2);">
+                    <i class="fas fa-map-marker-alt"></i> 
+                    <span>@Localizer["RecordAttendance"]</span>
+                </button>
+            }
+            else
+            {
+                <div class="attendance-status-badge" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 10px; font-weight: 600; border: 1px solid rgba(46, 204, 113, 0.2);">
+                    <i class="fas fa-check-circle"></i> 
+                    <span>@Localizer["AlreadyCheckedIn"]</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    async function handleCheckIn() {
+        const btn = document.getElementById('checkInBtn');
+        const originalContent = btn.innerHTML;
+        
+        if (!navigator.geolocation) {
+            Swal.fire({
+                icon: 'error',
+                title: '@Localizer["Error"]',
+                text: 'Geolocation is not supported by your browser.'
+            });
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> @Localizer["CheckingLocation"]...';
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                try {
+                    const response = await fetch('/StudentPortal/CheckIn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `latitude=${latitude}&longitude=${longitude}`
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '@Localizer["Success"]',
+                            text: result.message,
+                            confirmButtonColor: '#4D44B5'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '@Localizer["Failed"]',
+                            text: result.message,
+                            confirmButtonColor: '#4D44B5'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }
+                } catch (error) {
+                    console.error('Error recording attendance:', error);
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                }
+            },
+            (error) => {
+                let msg = 'Unable to retrieve your location.';
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg = 'Location permission denied. Please enable location to record attendance.';
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Location Error',
+                    text: msg,
+                    confirmButtonColor: '#4D44B5'
+                });
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+</script>
+
+@Html.AntiForgeryToken()
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@ViewBag.TotalPresent</h3>
+            <p>@Localizer["DaysPresent"]</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c;">
+            <i class="fas fa-times"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@ViewBag.TotalAbsent</h3>
+            <p>@Localizer["DaysAbsent"]</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(241, 196, 15, 0.1); color: #f1c40f;">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@ViewBag.TotalLate</h3>
+            <p>@Localizer["DaysLate"]</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-card" style="margin-top: 30px;">
+    <h3 class="card-title" style="margin-bottom: 20px;">@Localizer["MonthlyRecord"]</h3>
+    
+    @if (!Model.Any())
+    {
+        <div style="text-align: center; padding: 40px; color: var(--text-gray);">
+             @Localizer["NoAttendanceFound"]
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="custom-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Date"]</th>
+                        <th>@Localizer["Status"]</th>
+                        <th>@Localizer["Remarks"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.AttendanceDate.ToString("dddd, MMM dd, yyyy")</td>
+                            <td>
+                                @if (item.Status == "Present")
+                                {
+                                    <span class="status-badge st-paid"><span class="dot"></span> @Localizer["Present"]</span>
+                                }
+                                else if (item.Status == "Absent")
+                                {
+                                    <span class="status-badge st-overdue"><span class="dot"></span> @Localizer["Absent"]</span>
+                                }
+                                else if (item.Status == "Late")
+                                {
+                                    <span class="status-badge st-pending"><span class="dot"></span> @Localizer["Late"]</span>
+                                }
+                                else if (item.Status == "Excused")
+                                {
+                                    <span class="status-badge" style="background: #e8f4fd; color: #3498db;"><span class="dot" style="background: #3498db;"></span> @Localizer["Excused"]</span>
+                                }
+                            </td>
+                            <td>
+                                @(string.IsNullOrEmpty(item.Notes) ? "-" : item.Notes)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

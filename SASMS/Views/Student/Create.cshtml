@@ -1,0 +1,164 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["AddStudent"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="form-section" style="max-width: 1000px; margin: 0 auto;">
+    <h2 class="header-title" style="margin-bottom: 30px;">@Localizer["AddStudent"]</h2>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <!-- Show All Validation Errors -->
+        <div asp-validation-summary="All" class="validation-summary-box"></div>
+        
+        <!-- Personal Information -->
+        <div style="margin-bottom: 30px;">
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 600;">@Localizer["PersonalInformation"]</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["FullName"] *</label>
+                    <input type="text" name="name" class="form-input" placeholder="@Localizer["EnterFullName"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["EmailAddress"] *</label>
+                    <input type="email" name="email" class="form-input" placeholder="@Localizer["EnterEmail"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["NationalID"] *</label>
+                    <input type="text" name="nationalId" class="form-input" placeholder="@Localizer["EnterNationalID"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["PhoneNumber"] *</label>
+                    <input type="tel" name="phone" class="form-input" placeholder="@Localizer["EnterPhone"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["DateOfBirth"] *</label>
+                    <input type="date" name="dateOfBirth" class="form-input" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Gender"] *</label>
+                    <select name="gender" class="form-input" required>
+                        <option value="">@Localizer["SelectGender"]</option>
+                        <option value="Male">@Localizer["Male"]</option>
+                        <option value="Female">@Localizer["Female"]</option>
+                    </select>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Address"] *</label>
+                    <input type="text" name="address" class="form-input" placeholder="@Localizer["EnterAddress"]" required>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["ProfilePicture"]</label>
+                    <input type="file" name="profilePicture" class="form-input" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Information -->
+        <div style="margin-bottom: 30px;">
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 600;">@Localizer["AcademicInformation"]</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["StudentID"] *</label>
+                    <input type="text" name="studentId" class="form-input" placeholder="@Localizer["EnterStudentID"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SelectDepartment"] *</label>
+                    <select name="departmentId" class="form-input" required>
+                        <option value="">@Localizer["SelectDepartment"]</option>
+                        @foreach (var dept in ViewBag.Departments as SelectList)
+                        {
+                            <option value="@dept.Value">@dept.Text</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Class"] *</label>
+                    <select name="className" class="form-input" required>
+                        <option value="">@Localizer["SelectClass"]</option>
+                        @foreach (var cls in ViewBag.Classes as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+                        {
+                            <option value="@cls.Value">@cls.Text</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["AcademicYear"]</label>
+                    <select name="academicYearId" class="form-input">
+                        <option value="">@Localizer["SelectAcademicYear"]</option>
+                        @foreach (var year in ViewBag.AcademicYears as SelectList)
+                        {
+                            <option value="@year.Value">@year.Text</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["EnrollmentDate"]</label>
+                    <input type="date" name="enrollmentDate" class="form-input" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Status"] *</label>
+                    <select name="status" class="form-input" required>
+                        <option value="Active" selected>@Localizer["Active"]</option>
+                        <option value="Inactive">@Localizer["Inactive"]</option>
+                        <option value="Suspended">@Localizer["Suspended"]</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guardian Information -->
+        <div style="margin-bottom: 30px;">
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 600;">@Localizer["GuardianInformation"]</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["ParentName"] *</label>
+                    <input type="text" name="parentName" class="form-input" placeholder="@Localizer["EnterParentName"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["ParentPhone"] *</label>
+                    <input type="tel" name="parentPhone" class="form-input" placeholder="@Localizer["EnterPhone"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Kinship"] *</label>
+                    <select name="kinship" class="form-input" required>
+                        <option value="">@Localizer["SelectRelationship"]</option>
+                        <option value="Father">@Localizer["Father"]</option>
+                        <option value="Mother">@Localizer["Mother"]</option>
+                        <option value="Guardian">@Localizer["Guardian"]</option>
+                        <option value="Other">@Localizer["Other"]</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["EmergencyContactName"] *</label>
+                    <input type="text" name="emergencyContact" class="form-input" placeholder="@Localizer["EnterEmergencyContact"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["EmergencyPhone"] *</label>
+                    <input type="tel" name="emergencyPhone" class="form-input" placeholder="@Localizer["EnterEmergencyPhone"]" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div style="margin-bottom: 30px;">
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 600;">@Localizer["AccountInformation"]</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Password"] *</label>
+                    <input type="password" name="password" class="form-input" placeholder="@Localizer["MinChars"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["ConfirmPassword"] *</label>
+                    <input type="password" name="confirmPassword" class="form-input" placeholder="@Localizer["ReEnterPassword"]" required>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <button type="submit" class="form-btn">@Localizer["CreateStudent"]</button>
+            <a href="@Url.Action("List", "Student")" style="color: #A098AE; font-weight: 600; text-decoration: none;">@Localizer["Cancel"]</a>
+        </div>
+    </form>
+</div>

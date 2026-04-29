@@ -1,0 +1,303 @@
+@model IEnumerable<SASMS.Models.Suggestion>
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["Suggestions"];
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="dashboard-header-modern">
+    <div>
+        <h1 class="page-title">@Localizer["Suggestions"]</h1>
+        <p class="page-subtitle">@Localizer["SuggestionsSubtitle"]</p>
+    </div>
+    <button onclick="document.getElementById('suggestionFormContainer').scrollIntoView({behavior: 'smooth'})" class="form-btn" style="width: auto;">
+        <i class="fas fa-plus"></i> @Localizer["SubmitSuggestion"]
+    </button>
+</div>
+
+<!-- History Section -->
+<div class="content-card" style="margin-bottom: 30px;">
+    <h3 class="card-title" style="margin-bottom: 20px;">@Localizer["SuggestionHistory"]</h3>
+    
+    @if (!Model.Any())
+    {
+        <div style="text-align: center; padding: 40px; color: var(--text-gray);">
+            <i class="fas fa-lightbulb" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+            @Localizer["NoSuggestionsYet"]
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="custom-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Title"]</th>
+                        <th>@Localizer["Category"]</th>
+                        <th>@Localizer["Date"]</th>
+                        <th>@Localizer["Status"]</th>
+                        <th>@Localizer["Response"]</th>
+                        <th>@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div id="title-@item.Id" style="font-weight: 500;">@item.Title</div>
+                                @if (item.IsAnonymous)
+                                {
+                                    <span style="font-size: 11px; color: var(--text-gray);"><i class="fas fa-user-secret"></i> @Localizer["Anonymous"]</span>
+                                }
+                                <div id="desc-@item.Id" style="display:none;">@item.Description</div>
+                                <div id="cat-@item.Id" style="display:none;" data-category="@item.Category">@item.Category</div>
+                                <div id="anon-@item.Id" style="display:none;" data-anonymous="@item.IsAnonymous.ToString().ToLower()"></div>
+                            </td>
+                            <td>@item.Category</td>
+                            <td>@item.SuggestionDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (item.Status == "Pending")
+                                {
+                                    <span class="status-badge st-pending"><span class="dot"></span> @Localizer["Pending"]</span>
+                                }
+                                else if (item.Status == "UnderReview")
+                                {
+                                    <span class="status-badge st-pending" style="background: rgba(52, 152, 219, 0.1); color: #3498db;"><span class="dot" style="background: #3498db;"></span> @Localizer["UnderReview"]</span>
+                                }
+                                else if (item.Status == "Approved" || item.Status == "Implemented")
+                                {
+                                    <span class="status-badge st-paid"><span class="dot"></span> @Localizer[item.Status]</span>
+                                }
+                                else if (item.Status == "Rejected")
+                                {
+                                    <span class="status-badge st-overdue"><span class="dot"></span> @Localizer["Rejected"]</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge st-pending"><span class="dot"></span> @Localizer[item.Status]</span>
+                                }
+                            </td>
+                            <td style="max-width: 250px;">
+                                @if (!string.IsNullOrEmpty(item.ReviewNotes))
+                                {
+                                    <span style="display: block; font-size: 13px; color: var(--text-dark); background: rgba(46, 204, 113, 0.1); padding: 8px; border-radius: 6px;">
+                                        <i class="fas fa-reply" style="font-size: 10px; margin-right: 5px;"></i> @item.ReviewNotes
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--text-gray); font-style: italic; font-size: 12px;">@Localizer["NoResponseYet"]</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <button type="button" class="action-btn" onclick="openEditModal(@item.Id)" style="color: var(--primary); background: none; border: none; cursor: pointer;">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="action-btn" onclick="deleteSuggestion(@item.Id)" style="color: #D93025; background: none; border: none; cursor: pointer;">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                    else if (item.Status == "Rejected" || item.Status == "Implemented")
+                                    {
+                                        <button type="button" class="action-btn" onclick="deleteSuggestion(@item.Id)" style="color: #D93025; background: none; border: none; cursor: pointer;">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<script>
+    function deleteSuggestion(id) {
+        Swal.fire({
+            title: '@Localizer["AreYouSure"]',
+            text: '@Localizer["DeleteSuggestionWarning"]',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '@Localizer["Delete"]',
+            cancelButtonText: '@Localizer["Cancel"]'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/StudentPortal/DeleteSuggestion/' + id,
+                    type: 'POST',
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('@Localizer["Deleted"]', response.message, 'success').then(() => location.reload());
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function openEditModal(id) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-title').value = document.getElementById('title-' + id).innerText.trim();
+        document.getElementById('edit-description').value = document.getElementById('desc-' + id).innerText.trim();
+        document.getElementById('edit-category').value = document.getElementById('cat-' + id).dataset.category;
+        document.getElementById('edit-anonymous').checked = document.getElementById('anon-' + id).dataset.anonymous === 'true';
+
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    function saveEdit() {
+        const id = $('#edit-id').val();
+        const formData = $('#editForm').serialize();
+        
+        $.ajax({
+            url: '/StudentPortal/EditSuggestion/' + id,
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire('@Localizer["Success"]', response.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            }
+        });
+    }
+</script>
+
+<!-- New Suggestion Form -->
+<div id="suggestionFormContainer" class="content-card">
+    <h3 class="card-title" style="margin-bottom: 20px;">@Localizer["SubmitNewSuggestion"]</h3>
+    <form id="newSuggestionForm" method="post">
+        @Html.AntiForgeryToken()
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SuggestionTitle"] *</label>
+                <input type="text" name="title" class="form-input" placeholder="@Localizer["SuggestionPlaceholder"]" required>
+            </div>
+            
+            <div>
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Category"] *</label>
+                <select name="category" class="form-input" required>
+                    <option value="">@Localizer["SelectCategory"]</option>
+                    <option value="Academic">@Localizer["Academic"]</option>
+                    <option value="Administrative">@Localizer["Administrative"]</option>
+                    <option value="Facilities">@Localizer["Facilities"]</option>
+                    <option value="Services">@Localizer["Services"]</option>
+                    <option value="Activities">@Localizer["Activities"]</option>
+                    <option value="Other">@Localizer["Other"]</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; align-items: center; margin-top: 25px;">
+                <label class="switch" style="margin-right: 10px;">
+                    <input type="checkbox" name="isAnonymous" value="true">
+                    <span class="slider round"></span>
+                </label>
+                <span style="font-size: 14px; color: var(--text-dark);">@Localizer["SubmitAnonymously"]</span>
+            </div>
+            
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SuggestionDetails"] *</label>
+                <textarea name="description" class="form-input" rows="5" placeholder="@Localizer["DescribeSuggestionPlaceholder"]" required></textarea>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button type="button" onclick="submitSuggestion()" class="form-btn">@Localizer["SubmitSuggestion"]</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function submitSuggestion() {
+        const form = $('#newSuggestionForm');
+        if (!form[0].checkValidity()) {
+            form[0].reportValidity();
+            return;
+        }
+
+        const formData = form.serialize();
+        $.ajax({
+            url: '/StudentPortal/SubmitSuggestion',
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: '@Localizer["Success"]',
+                        text: response.message,
+                        icon: 'success'
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Failed to submit suggestion', 'error');
+            }
+        });
+    }
+</script>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div class="content-card" style="width: 90%; max-width: 600px; margin: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 class="card-title" style="margin:0;">@Localizer["EditSuggestion"]</h3>
+            <button onclick="closeEditModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-gray);">&times;</button>
+        </div>
+        <form id="editForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="edit-id" name="id">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SuggestionTitle"] *</label>
+                    <input type="text" id="edit-title" name="title" class="form-input" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Category"] *</label>
+                    <select id="edit-category" name="category" class="form-input" required>
+                        <option value="Academic">@Localizer["Academic"]</option>
+                        <option value="Administrative">@Localizer["Administrative"]</option>
+                        <option value="Facilities">@Localizer["Facilities"]</option>
+                        <option value="Services">@Localizer["Services"]</option>
+                        <option value="Activities">@Localizer["Activities"]</option>
+                        <option value="Other">@Localizer["Other"]</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; margin-top: 25px;">
+                    <label class="switch" style="margin-right: 10px;">
+                        <input type="checkbox" id="edit-anonymous" name="isAnonymous" value="true">
+                        <span class="slider round"></span>
+                    </label>
+                    <span style="font-size: 14px; color: var(--text-dark);">@Localizer["SubmitAnonymously"]</span>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SuggestionDetails"] *</label>
+                    <textarea id="edit-description" name="description" class="form-input" rows="5" required></textarea>
+                </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeEditModal()" class="form-btn" style="background:#eee; color:#333;">@Localizer["Cancel"]</button>
+                <button type="button" onclick="saveEdit()" class="form-btn">@Localizer["SaveChanges"]</button>
+            </div>
+        </form>
+    </div>
+</div>

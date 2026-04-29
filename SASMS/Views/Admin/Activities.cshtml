@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Activities";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">School Activities</h3>
+         <button class="dropdown-btn" style="background: var(--primary); color: white;">
+            <i class="fas fa-plus"></i> New Activity
+        </button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        <!-- Activity Card 1 -->
+        <div style="border: 1px solid #F0F0F0; border-radius: 12px; overflow: hidden; transition: 0.2s;">
+            <div style="height: 140px; background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%); position: relative;">
+                <span style="position: absolute; top: 12px; right: 12px; background: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #FF5252;">Sports</span>
+            </div>
+            <div style="padding: 20px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text-dark);">Annual Sports Day</h4>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 16px;">Football, Basketball, and Track events for all grades.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 12px; color: var(--text-dark); font-weight: 600;">
+                        <i class="far fa-calendar-alt" style="color: #A098AE; margin-right: 4px;"></i> Nov 15, 2025
+                    </div>
+                    <div style="display: flex; -space: -8px;">
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #E1F1FF; border: 2px solid white;"></div>
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #FFF4E5; border: 2px solid white; margin-left: -8px;"></div>
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #F3F4FF; border: 2px solid white; margin-left: -8px; font-size: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-gray);">+20</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Card 2 -->
+        <div style="border: 1px solid #F0F0F0; border-radius: 12px; overflow: hidden; transition: 0.2s;">
+            <div style="height: 140px; background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); position: relative;">
+                 <span style="position: absolute; top: 12px; right: 12px; background: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #9B59B6;">Science</span>
+            </div>
+            <div style="padding: 20px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text-dark);">Science Fair 2025</h4>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 16px;">Showcasing student projects and experiments.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 12px; color: var(--text-dark); font-weight: 600;">
+                        <i class="far fa-calendar-alt" style="color: #A098AE; margin-right: 4px;"></i> Dec 05, 2025
+                    </div>
+                    <div style="display: flex; -space: -8px;">
+                         <div style="width: 24px; height: 24px; border-radius: 50%; background: #E1F1FF; border: 2px solid white;"></div>
+                         <div style="width: 24px; height: 24px; border-radius: 50%; background: #F3F4FF; border: 2px solid white; margin-left: -8px; font-size: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-gray);">+50</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Card 3 -->
+        <div style="border: 1px solid #F0F0F0; border-radius: 12px; overflow: hidden; transition: 0.2s;">
+            <div style="height: 140px; background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); position: relative;">
+                <span style="position: absolute; top: 12px; right: 12px; background: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #2ECC71;">Art</span>
+            </div>
+            <div style="padding: 20px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text-dark);">Art Exhibition</h4>
+                <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 16px;">Gallery walk through student art pieces.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 12px; color: var(--text-dark); font-weight: 600;">
+                        <i class="far fa-calendar-alt" style="color: #A098AE; margin-right: 4px;"></i> Dec 20, 2025
+                    </div>
+                     <div style="display: flex; -space: -8px;">
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #FFF4E5; border: 2px solid white; margin-left: -8px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

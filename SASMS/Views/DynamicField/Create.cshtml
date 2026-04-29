@@ -1,0 +1,95 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@model SASMS.Models.DynamicField
+@using SASMS.Models
+
+@{
+    ViewData["Title"] = Localizer["Create Dynamic Field"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card" style="padding: 30px; max-width: 800px; margin: 0 auto;">
+    <div class="table-header" style="border-bottom: 1px solid #eee; margin-bottom: 25px; padding-bottom: 15px;">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["Add New Form Field"]</h3>
+        <a href="@Url.Action("Index")" class="action-btn" style="color: #A098AE;"><i class="fas fa-arrow-left"></i> @Localizer["Back to List"]</a>
+    </div>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">@Localizer["Field Label (Visible to user)"]</label>
+                <input asp-for="Label" class="form-control" placeholder="e.g. National ID Photo" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required />
+                <span asp-validation-for="Label" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">@Localizer["Internal Name (Unique)"]</label>
+                <input asp-for="FieldName" class="form-control" placeholder="e.g. national_id_photo" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required />
+                <span asp-validation-for="FieldName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">@Localizer["Field Type"]</label>
+                <select asp-for="Type" asp-items="Html.GetEnumSelectList<FieldType>()" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white;"></select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">@Localizer["Form Section"]</label>
+                <select asp-for="Section" asp-items="Html.GetEnumSelectList<FormSection>()" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white;"></select>
+                <span asp-validation-for="Section" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;" id="optionsGroup">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600;">@Localizer["Select Options (Comma separated)"]</label>
+            <textarea asp-for="Options" class="form-control" placeholder="Option 1, Option 2, Option 3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;"></textarea>
+            <small style="color: #A098AE;">@Localizer["SelectOptionsDesc"]</small>
+        </div>
+
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">@Localizer["Display Order"] <span class="required">*</span></label>
+                <input asp-for="DisplayOrder" type="number" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required />
+                <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 20px; height: 100%; padding-top: 30px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input asp-for="IsRequired" type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);" />
+                    @Localizer["Is Required"]
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input asp-for="IsActive" type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);" checked />
+                    @Localizer["Is Active"]
+                </label>
+            </div>
+        </div>
+
+        <div style="text-align: right;">
+            <button type="submit" class="dropdown-btn" style="background: var(--primary); color: white; border: none; padding: 12px 30px; cursor: pointer; border-radius: 8px;">
+                <i class="fas fa-save" style="margin-right: 8px;"></i> @Localizer["Save Field"]
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.querySelector('select[name="Type"]');
+        const optionsGroup = document.getElementById('optionsGroup');
+
+        function toggleOptions() {
+            // FieldType.Select index is 3
+            if (typeSelect.value === "3") {
+                optionsGroup.style.display = 'block';
+            } else {
+                optionsGroup.style.display = 'none';
+            }
+        }
+
+        typeSelect.addEventListener('change', toggleOptions);
+        toggleOptions();
+    });
+</script>

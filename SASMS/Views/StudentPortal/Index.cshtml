@@ -1,0 +1,159 @@
+@model SASMS.Models.Student
+@using SASMS.Helpers
+@using Microsoft.Extensions.Localization
+
+
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Dashboard"];
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="dashboard-header-modern">
+    <div>
+        <h1 class="page-title">@Localizer["WelcomeBack"], @Model.User.Name! 👋</h1>
+        <p class="page-subtitle">@Localizer["AcademicOverview"]</p>
+    </div>
+    <div class="current-date">
+        <i class="far fa-calendar-alt"></i> @DateTime.Now.ToString("dd MMMM, yyyy")
+    </div>
+</div>
+
+<div class="stats-grid">
+    <!-- Attendance Card -->
+    @{
+        var attendanceRate = ViewBag.AttendanceRate ?? 0.0;
+        var attendanceClass = attendanceRate >= 90 ? "positive" : (attendanceRate >= 75 ? "neutral" : "negative");
+        var attendanceIconColor = attendanceRate >= 90 ? "#2ecc71" : (attendanceRate >= 75 ? "#f1c40f" : "#e74c3c");
+        var attendanceBgColor = attendanceRate >= 90 ? "rgba(46, 204, 113, 0.1)" : (attendanceRate >= 75 ? "rgba(241, 196, 15, 0.1)" : "rgba(231, 76, 60, 0.1)");
+    }
+    <div class="stat-card">
+        <div class="stat-icon" style="background: @attendanceBgColor; color: @attendanceIconColor;">
+            <i class="fas fa-user-check"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@attendanceRate.ToString("F1")%</h3> 
+            <p>@Localizer["AttendanceRate"]</p>
+        </div>
+        <div class="stat-trend @attendanceClass">
+            @if (attendanceRate >= 90)
+            {
+                <i class="fas fa-arrow-up"></i> @Localizer["KeepItUp"]
+            }
+            else if (attendanceRate >= 75)
+            {
+                <i class="fas fa-minus"></i> @Localizer["GoodWork"]
+            }
+            else
+            {
+                <i class="fas fa-arrow-down"></i> @Localizer["NeedsImprovement"]
+            }
+        </div>
+    </div>
+
+    <!-- Fees Card -->
+    @{
+        var outstandingFees = ViewBag.OutstandingFees ?? 0.0m;
+        var feesClass = outstandingFees <= 0 ? "positive" : "negative";
+        var feesIconColor = outstandingFees <= 0 ? "#2ecc71" : "#e74c3c";
+        var feesBgColor = outstandingFees <= 0 ? "rgba(46, 204, 113, 0.1)" : "rgba(231, 76, 60, 0.1)";
+    }
+    <div class="stat-card">
+        <div class="stat-icon" style="background: @feesBgColor; color: @feesIconColor;">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@outstandingFees.ToString("C2")</h3>
+            <p>@Localizer["OutstandingFees"]</p>
+        </div>
+        <div class="stat-trend @feesClass">
+            @if (outstandingFees <= 0)
+            {
+                <i class="fas fa-check"></i> @Localizer["NoPendingDues"]
+            }
+            else
+            {
+                <i class="fas fa-exclamation-triangle"></i> @Localizer["PaymentDue"]
+            }
+        </div>
+    </div>
+
+    <!-- Activities Card -->
+    @{
+        var activeActivities = ViewBag.ActiveActivities ?? 0;
+    }
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">
+            <i class="fas fa-running"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@activeActivities</h3>
+            <p>@Localizer["ActiveActivities"]</p>
+        </div>
+        <div class="stat-trend neutral">
+            <i class="fas fa-info-circle"></i> @Localizer["JoinMore"]
+        </div>
+    </div>
+    
+    <!-- Class Info -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(155, 89, 182, 0.1); color: #9b59b6;">
+            <i class="fas fa-chalkboard"></i>
+        </div>
+        <div class="stat-info">
+            <h3>@(string.IsNullOrEmpty(Model.ClassName) ? "N/A" : Model.ClassName)</h3>
+            <p>@Localizer["CurrentClass"]</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions & Recent Activity -->
+<div class="dashboard-grid" style="margin-top: 30px; display: grid; grid-template-columns: 2fr 1fr; gap: 25px;">
+    
+    <!-- Left Column: Quick Actions -->
+    <div class="content-card">
+        <h3 class="card-title">@Localizer["QuickActions"]</h3>
+        <div class="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+            <a href="@Url.Action("Complaints", "StudentPortal")" class="quick-action-btn">
+                <i class="fas fa-paper-plane" style="color: #e67e22;"></i>
+                <span>@Localizer["SubmitComplaint"]</span>
+            </a>
+            <a href="@Url.Action("Messaging", "StudentPortal")" class="quick-action-btn">
+                <i class="fas fa-comments" style="color: #3498db;"></i>
+                <span>@Localizer["MessageAdmin"]</span>
+            </a>
+             <a href="@Url.Action("Activities", "StudentPortal")" class="quick-action-btn">
+                <i class="fas fa-search" style="color: #2ecc71;"></i>
+                <span>@Localizer["BrowseActivities"]</span>
+            </a>
+            <a href="@Url.Action("Suggestions", "StudentPortal")" class="quick-action-btn">
+                <i class="far fa-lightbulb" style="color: #FCC43E;"></i>
+                <span>@Localizer["SubmitSuggestion"]</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Right Column: Profile Summary -->
+    <div class="content-card">
+        <div style="text-align: center; padding: 10px 0;">
+            <img src="@AvatarHelper.GetAvatarUrl(Model.User.Name, Model.ProfilePicturePath ?? Model.User.ProfilePicturePath)" 
+                 alt="Profile" 
+                 class="u-avatar"
+                 style="width: 100px; height: 100px; margin-bottom: 15px;">
+            <h4 style="margin: 0; font-size: 18px; font-weight: 700;">@Model.User.Name</h4>
+            <p style="color: var(--text-gray); font-size: 13px;">ID: @Model.StudentId</p>
+            
+            <div style="background: var(--bg-body); padding: 15px; border-radius: 12px; margin-top: 20px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 13px; color: var(--text-gray);">@Localizer["Status"]</span>
+                    <span style="font-size: 13px; font-weight: 600; color: #2ecc71;">@Model.Status</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 13px; color: var(--text-gray);">@Localizer["Department"]</span>
+                    <span style="font-size: 13px; font-weight: 600;">@Model.Department?.Name</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

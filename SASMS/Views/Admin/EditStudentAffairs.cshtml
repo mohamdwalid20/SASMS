@@ -1,0 +1,65 @@
+@model SASMS.Models.StudentAffairs
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["EditStaffProfile"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var departments = ViewBag.Departments as List<SASMS.Models.Department>;
+}
+
+<div class="form-section" style="max-width: 900px; margin: 0 auto;">
+    <h2 class="header-title" style="margin-bottom: 30px;">@Localizer["EditStaffProfile"]</h2>
+
+    <form asp-action="EditStudentAffairs" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        
+        <div style="margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
+                 <h4 style="color: var(--primary); font-size: 18px; font-weight: 600;">@Localizer["ProfileInformation"]</h4>
+                 <div style="background: linear-gradient(135deg, #D3C1FA 0%, #C5B0F5 100%); color: white; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                     @Model.User.Name
+                 </div>
+            </div>
+           
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["FullName"] *</label>
+                    <input type="text" name="Name" class="form-input" value="@Model.User.Name" placeholder="@Localizer["EnterFullName"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["EmailAddress"] *</label>
+                    <input type="email" name="Email" class="form-input" value="@Model.User.Email" placeholder="@Localizer["EnterEmail"]" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["PhoneNumber"] *</label>
+                    <input type="tel" name="Phone" class="form-input" value="@Model.User.PhoneNumber" placeholder="@Localizer["EnterPhone"]" required>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding-top: 30px;">
+                     <input type="checkbox" name="IsActive" value="true" @(Model.User.IsActive ? "checked" : "") style="width: 20px; height: 20px; accent-color: var(--primary);">
+                     <label style="font-size: 14px; font-weight: 600; color: var(--text-dark);">@Localizer["ActiveAccount"]</label>
+                </div>
+            </div>
+        </div>
+
+         <div style="margin-bottom: 30px;">
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 18px; font-weight: 600;">@Localizer["JobDetails"]</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SystemRole"] *</label>
+                    <select name="Role" class="form-input" required asp-items="ViewBag.Roles">
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["JobTitle"] *</label>
+                    <input type="text" name="Position" class="form-input" value="@Model.Position" placeholder="@Localizer["EnterJobTitle"]" required>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <button type="submit" class="form-btn">@Localizer["Save"]</button>
+            <a href="@Url.Action("StudentAffairsList", "Admin")" style="color: #A098AE; font-weight: 600; text-decoration: none;">@Localizer["Cancel"]</a>
+        </div>
+    </form>
+</div>

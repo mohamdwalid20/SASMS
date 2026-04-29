@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Admissions";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">New Admissions</h3>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="search-filter">
+                <i class="fas fa-search" style="color: #A098AE;"></i>
+                <input type="text" placeholder="Search applicant...">
+            </div>
+            <button class="dropdown-btn">
+                Status <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></th>
+                <th>Applicant ID</th>
+                <th>Name</th>
+                <th>Grade</th>
+                <th>Parent Name</th>
+                <th>Phone</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="row-item">
+                <td><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                <td style="font-weight: 600; color: var(--primary);">#APP-2023-001</td>
+                <td class="user-cell">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #E1F1FF; display: flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 700;">A</div>
+                    <div class="user-meta">
+                        <div>Ahmed Ali</div>
+                        <div>ahmed@example.com</div>
+                    </div>
+                </td>
+                <td>Grade 1</td>
+                <td>Ali Hassan</td>
+                <td>+20 123 456 789</td>
+                <td>Oct 25, 2025</td>
+                <td><span class="status-badge st-paid">Approved</span></td>
+                <td>
+                    <button class="action-btn"><i class="far fa-eye"></i></button>
+                    <button class="action-btn"><i class="fas fa-check"></i></button>
+                    <button class="action-btn"><i class="fas fa-times"></i></button>
+                </td>
+            </tr>
+            <tr class="row-item">
+                <td><input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                <td style="font-weight: 600; color: var(--primary);">#APP-2023-002</td>
+                 <td class="user-cell">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #FFF4E5; display: flex; align-items: center; justify-content: center; color: #FCC43E; font-weight: 700;">S</div>
+                    <div class="user-meta">
+                        <div>Sara Mohamed</div>
+                        <div>sara@example.com</div>
+                    </div>
+                </td>
+                <td>KG 2</td>
+                <td>Mohamed Ahmed</td>
+                <td>+20 109 876 543</td>
+                <td>Oct 24, 2025</td>
+                <td><span class="status-badge st-pending">Pending</span></td>
+                <td>
+                    <button class="action-btn"><i class="far fa-eye"></i></button>
+                    <button class="action-btn"><i class="fas fa-check"></i></button>
+                    <button class="action-btn"><i class="fas fa-times"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,164 @@
+@model IEnumerable<SASMS.ViewModels.ComplaintViewModel>
+@using Microsoft.Extensions.Localization
+@using SASMS.Helpers
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["Complaints"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["ComplaintsAndIssues"]</h3>
+        
+        <div class="filter-bar">
+            <form method="get"  align-items: center; gap: 10px;">
+                <select name="category" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 8px; outline: none; font-size: 13px; color: var(--text-dark);">
+                    <option value="">@Localizer["AllCategories"]</option>
+                    <option value="Academic" selected="@(ViewBag.CategoryFilter == "Academic")">@Localizer["Academic"]</option>
+                    <option value="Facilities" selected="@(ViewBag.CategoryFilter == "Facilities")">@Localizer["Facilities"]</option>
+                    <option value="Disciplinary" selected="@(ViewBag.CategoryFilter == "Disciplinary")">@Localizer["Disciplinary"]</option>
+                     <option value="Other" selected="@(ViewBag.CategoryFilter == "Other")">@Localizer["Other"]</option>
+                </select>
+                <select name="status" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #E0E0E0; border-radius: 8px; outline: none; font-size: 13px; color: var(--text-dark);">
+                    <option value="">@Localizer["All Status"]</option>
+                    <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">@Localizer["Pending"]</option>
+                    <option value="InProgress" selected="@(ViewBag.StatusFilter == "InProgress")">@Localizer["In Progress"]</option>
+                    <option value="Resolved" selected="@(ViewBag.StatusFilter == "Resolved")">@Localizer["Resolved"]</option>
+                    <option value="Closed" selected="@(ViewBag.StatusFilter == "Closed")">@Localizer["Closed"]</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 24px;">
+        <div class="metric-card" style="background: #FFFDF5; border: 1px solid #FFF8E1;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Pending"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FCC43E;">@ViewBag.PendingCount</div>
+        </div>
+        <div class="metric-card" style="background: #E8F0FE; border: 1px solid #D2E3FC;">
+            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["InProgress"]</div>
+            <div style="font-size: 20px; font-weight: 700; color: #1A73E8;">@ViewBag.InProgressCount</div>
+        </div>
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>@Localizer["Title"]</th>
+                <th>@Localizer["Category"]</th>
+                <th>@Localizer["SubmittedBy"]</th>
+                <th>@Localizer["Date"]</th>
+                <th>@Localizer["Priority"]</th>
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["AssignedTo"]</th>
+                <th>@Localizer["Action"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td style="font-weight: 600; color: var(--text-dark);">@item.ComplaintId</td>
+                    <td style="font-weight: 600;">@item.Title</td>
+                    <td>
+                        <span style="background: #F0F0F0; padding: 4px 8px; border-radius: 4px; font-size: 11px;">@item.Category</span>
+                    </td>
+                         <td class="user-cell">
+                         @if(!item.IsAnonymous) {
+                            <img src="@AvatarHelper.GetAvatarUrl(item.StudentName, item.StudentProfilePicture)" alt="Avatar">
+                            <div class="user-meta">
+                                <div>@item.StudentName</div>
+                                <div style="font-size: 11px;">@item.Role</div>
+                            </div>
+                         } else {
+                              <div style="width: 36px; height: 36px; border-radius: 50%; background: #EEE; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #888;">?</div>
+                            <div class="user-meta">
+                                <div>@Localizer["Anonymous"]</div>
+                            </div>
+                         }
+                    </td>
+                    <td>@item.ComplaintDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @if(item.Priority == "High") {
+                            <span style="color: #D93025; font-weight: 600;">@Localizer["High"]</span>
+                        } else if (item.Priority == "Medium") {
+                            <span style="color: #F9AB00; font-weight: 600;">@Localizer["Medium"]</span>
+                        } else {
+                            <span style="color: #1E8E3E; font-weight: 500;">@Localizer["Low"]</span>
+                        }
+                    </td>
+                    <td>
+                         @if (item.Status == "Resolved" || item.Status == "Closed")
+                        {
+                            <span class="status-badge st-paid"><span class="dot"></span> @item.Status</span>
+                        }
+                        else if (item.Status == "Pending")
+                        {
+                            <span class="status-badge st-pending"><span class="dot"></span>@Localizer["Pending"]</span>
+                        }
+                         else if (item.Status == "InProgress")
+                        {
+                            <span class="status-badge st-paid" style="color: #1A73E8; background: #E8F0FE;"><span class="dot" style="background: #1A73E8;"></span>@Localizer["In Progress"]</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge st-overdue"><span class="dot"></span> @item.Status</span>
+                        }
+                    </td>
+                    <td style="font-size: 13px; color: var(--text-gray);">@item.AssignedToName</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="action-btn"><i class="far fa-eye"></i></a>
+                        <button type="button" class="action-btn delete-btn" onclick="deleteComplaint(@item.Id)" style="color: #D93025; background: none; border: none; cursor: pointer;">
+                            <i class="far fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoComplaintsFound"]</div>
+    }
+</div>
+
+<script>
+    function deleteComplaint(id) {
+        Swal.fire({
+            title: '@Localizer["AreYouSure"]',
+            text: '@Localizer["DeleteComplaintWarning"]',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '@Localizer["Delete"]',
+            cancelButtonText: '@Localizer["Cancel"]'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Complaint/Delete/' + id,
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire(
+                                '@Localizer["Deleted"]',
+                                response.message,
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Something went wrong', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>

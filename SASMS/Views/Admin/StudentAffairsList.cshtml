@@ -1,0 +1,153 @@
+@model IEnumerable<SASMS.Models.StudentAffairs>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["StaffManagement"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="widget-title" style="margin: 0;">@Localizer["AllStaffMembers"]</h3>
+        
+        <div class="filter-bar">
+            <!-- Bulk Delete Button (Hidden by default) -->
+            <button type="button" id="bulkDeleteBtn" class="dropdown-btn" style="background: #FF5252; color: white; display: none; border: none; cursor: pointer;" onclick="document.getElementById('bulkDeleteForm').submit();">
+                <i class="fas fa-trash-alt"></i> @Localizer["DeleteSelected"]
+            </button>
+
+            <div class="search-filter">
+                <form id="searchForm" asp-action="StudentAffairsList" method="get" style="display: flex; align-items: center; width: 100%;">
+                    <i class="fas fa-search" style="color: #A098AE; margin-right: 10px;"></i>
+                    <input type="text" id="searchInput" name="searchTerm" value="@ViewData["SearchTerm"]" placeholder="@Localizer["SearchByName"]" style="width: 100%; outline: none; flex: 1;">
+                    <button type="submit" style="background: none; border: none; cursor: pointer; color: var(--primary); padding: 0 10px;">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+             <a href="@Url.Action("CreateStudentAffairs", "Admin")" class="dropdown-btn" style="background: var(--primary); color: white;">
+                <i class="fas fa-plus"></i> @Localizer["AddNew"]
+            </a>
+        </div>
+    </div>
+
+    <!-- Hidden Bulk Delete Form -->
+    <form id="bulkDeleteForm" asp-action="BulkDeleteStudentAffairs" method="post" style="display: none;">
+        <!-- Container for dynamic inputs so we don't wipe the AntiForgeryToken -->
+        <div id="bulkDeleteInputs"></div>
+    </form>
+
+    <table class="custom-table" id="staffTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll" style="width: 18px; height: 18px; accent-color: var(--primary);"></th>
+                <th>@Localizer["Name"]</th>
+                <th>@Localizer["Role"]</th>
+                <th>@Localizer["Position"]</th>
+                <th>@Localizer["Phone"]</th>
+                <th>@Localizer["DateJoined"]</th>
+                <th>@Localizer["Action"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td><input type="checkbox" class="row-checkbox" value="@item.Id" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                <td class="user-cell">
+                        @if (!string.IsNullOrEmpty(item.User.ProfilePicturePath))
+                        {
+                            <img src="@item.User.ProfilePicturePath" class="u-avatar">
+                        }
+                        else
+                        {
+                            <div class="u-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                                @(!string.IsNullOrEmpty(item.User.Name) ? item.User.Name.Substring(0, 1).ToUpper() : "U")
+                            </div>
+                        }
+                        <div class="user-meta">
+                            <div>@item.User.Name</div>
+                            <div>@item.User.Email</div>
+                        </div>
+                    </td>
+                    <td>@Localizer[item.User.Role.ToString()]</td>
+                    <td>@item.Position</td>
+                    <td>@item.User.PhoneNumber</td>
+                    <td>@item.HireDate.ToString("MMM dd, yyyy")</td>
+                 
+                    <td>
+                        <a href="@Url.Action("EditStudentAffairs", "Admin", new { id = item.Id })" class="action-btn"><i class="far fa-edit"></i></a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" 
+                                          onsubmit="confirmAction(event, this)"
+                                          data-confirm-title="@Localizer["ConfirmDelete"]"
+                                          data-confirm-text="@Localizer["ActionCannotBeUndone"]"
+                                          data-confirm-icon="warning"
+                                          data-confirm-yes="@Localizer["YesDelete"]"
+                                          style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="@Localizer["Delete"]">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+     @if (!Model.Any()) {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoRecordsFound"]</div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        const bulkDeleteInputs = document.getElementById('bulkDeleteInputs');
+
+        function updateBulkStats() {
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            if (checkedCount > 0) {
+                bulkDeleteBtn.style.display = 'inline-flex';
+                bulkDeleteBtn.innerHTML = `<i class="fas fa-trash-alt" style="margin-right: 8px;"></i> @Localizer["Delete"] (${checkedCount})`;
+                
+                // Update hidden inputs
+                bulkDeleteInputs.innerHTML = ''; // Clear only the inputs container
+                document.querySelectorAll('.row-checkbox:checked').forEach(cb => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'ids';
+                    input.value = cb.value;
+                    bulkDeleteInputs.appendChild(input);
+                });
+            } else {
+                bulkDeleteBtn.style.display = 'none';
+            }
+        }
+
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateBulkStats();
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkStats);
+        });
+
+        // Auto-submit search with debounce
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        let searchTimeout;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    searchForm.submit();
+                }, 500); // Submit 500ms after user stops typing
+            });
+        }
+    });
+</script>

@@ -1,0 +1,162 @@
+@model IEnumerable<SASMS.Models.GovernmentFee>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Localizer["GovernmentFees"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="dashboard-header-modern">
+    <div class="stat-info">
+        <h3>@Localizer["GovernmentFeesManagement"]</h3>
+        <p>@Localizer["ManageGovernmentFeeCategories"]</p>
+    </div>
+    <a href="@Url.Action("Create")" class="form-btn" style="text-decoration: none; padding: 12px 24px; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-plus"></i> @Localizer["AddNewFee"]
+    </a>
+</div>
+
+<div class="table-card" style="margin-top: 20px;">
+    <div class="filter-bar">
+        <div class="search-filter">
+            <i class="fas fa-search" style="color: var(--text-gray);"></i>
+            <input type="text" id="feeSearch" placeholder="@Localizer["Search"]...">
+        </div>
+    </div>
+
+    <table class="custom-table" id="feesTable">
+        <thead>
+            <tr>
+                <th>@Localizer["FeeName"]</th>
+                <th>@Localizer["Amount"]</th>
+                <th>@Localizer["AcademicYear"]</th>
+                <th>@Localizer["Status"]</th>
+                <th style="text-align: center;">@Localizer["Actions"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="row-item">
+                    <td>
+                        <div class="user-cell">
+                            <i class="fas fa-file-invoice-dollar" style="font-size: 24px; color: var(--primary); opacity: 0.7;"></i>
+                            <div class="user-meta">
+                                <div>@item.Name</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: var(--primary); font-weight: 700;">@item.Amount.ToString("C", new System.Globalization.CultureInfo("ar-EG"))</td>
+                    <td><span class="category-badge">@item.AcademicYear.Year</span></td>
+                    <td>
+                        @if (!item.IsPublished)
+                        {
+                            <span class="status-badge st-overdue" style="background: rgba(149, 165, 166, 0.1); color: #7f8c8d;">
+                                <span class="dot" style="background: #7f8c8d;"></span>
+                                @Localizer["Draft"]
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="status-badge @(item.IsActive ? "st-paid" : "st-overdue")">
+                                <span class="dot"></span>
+                                @(item.IsActive ? Localizer["Active"] : Localizer["Inactive"])
+                            </span>
+                        }
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            @if (!item.IsPublished)
+                            {
+                                <button onclick="generateSubmissions(@item.Id)" class="action-btn" title="@Localizer["PublishNow"]" style="color: #2ecc71;">
+                                    <i class="fas fa-rocket"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <button onclick="generateSubmissions(@item.Id)" class="action-btn" title="@Localizer["RegenerateSubmissions"]" style="color: #4CACFF;">
+                                    <i class="fas fa-users-cog"></i>
+                                </button>
+                            }
+                            <a href="@Url.Action("Submissions", new { feeId = item.Id })" class="action-btn" title="@Localizer["ViewSubmissions"]" style="color: var(--primary);">
+                                <i class="fas fa-list-ul"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    @Html.AntiForgeryToken()
+    <script>
+        document.getElementById('feeSearch')?.addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#feesTable tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(val) ? '' : 'none';
+            });
+        });
+
+        function generateSubmissions(id) {
+            console.log("Publishing fee category:", id);
+            
+            Swal.fire({
+                title: @Json.Serialize(Localizer["AreYouSure"].Value),
+                text: @Json.Serialize(Localizer["GenerateSubmissionsConfirm"].Value),
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2ecc71',
+                cancelButtonColor: '#95a5a6',
+                confirmButtonText: @Json.Serialize(Localizer["YesGenerate"].Value),
+                cancelButtonText: @Json.Serialize(Localizer["Cancel"].Value)
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    const formData = new URLSearchParams();
+                    formData.append('feeId', id);
+                    formData.append('__RequestVerificationToken', token);
+
+                    fetch('@Url.Action("GenerateSubmissions")', { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: formData
+                    })
+                    .then(r => {
+                        if (!r.ok) throw new Error('Network response was not ok');
+                        return r.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: @Json.Serialize(Localizer["Success"].Value),
+                                text: data.message
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: @Json.Serialize(Localizer["Error"].Value),
+                                text: data.message
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: @Json.Serialize(Localizer["Error"].Value),
+                            text: 'An unexpected error occurred.'
+                        });
+                    });
+                }
+            });
+        }
+    </script>
+}

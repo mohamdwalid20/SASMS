@@ -1,0 +1,288 @@
+@model SASMS.Models.Activity
+@using Microsoft.Extensions.Localization
+@using System.Security.Claims
+@inject IStringLocalizer<SharedResources> Localizer
+
+@{
+    ViewData["Title"] = Model.Title;
+    var userType = User.FindFirstValue(System.Security.Claims.ClaimTypes.Role);
+    bool isAdmin = userType == "Admin" || userType == "StudentAffairs";
+    bool isSupervisor = userType == "Supervisor";
+    bool isActivityTeacher = userType == "ActivityTeacher";
+    bool isStudent = userType == "Student";
+    
+    // Any management role uses the Admin Layout
+    Layout = (isAdmin || isSupervisor || isActivityTeacher) ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_StudentLayout.cshtml";
+    
+    bool isRegistered = ViewBag.IsRegistered ?? false;
+}
+
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <!-- Header / Back Navigation -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <a asp-controller="@(isStudent ? "StudentPortal" : "Activity")" asp-action="@(isStudent ? "Activities" : "List")" style="color: var(--text-gray); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-arrow-left"></i> @Localizer["BackToList"]
+        </a>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            @if (isAdmin || isSupervisor || isActivityTeacher)
+            {
+                <a asp-action="Participants" asp-route-id="@Model.Id" class="btn" style="background: #F0F4FF; color: var(--primary); padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">
+                    <i class="fas fa-users"></i> @Localizer["ViewParticipants"]
+                </a>
+            }
+            @if (isAdmin || isSupervisor)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn" style="background: #FFF0F0; color: #FCC43E; padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;">
+                    <i class="fas fa-edit"></i> @Localizer["Edit"]
+                </a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" 
+                      onsubmit="confirmAction(event, this)"
+                      data-confirm-title="@Localizer["DeleteConfirmationText"]"
+                      data-confirm-text="@Localizer["ActionCannotBeUndone"]"
+                      data-confirm-icon="warning"
+                      data-confirm-yes="@Localizer["YesDelete"]"
+                      style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn" style="background: #FFF0F0; border: none; color: #FF5252; padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-trash-alt"></i> @Localizer["Delete"]
+                    </button>
+                </form>
+            }
+            <span style="background: @(Model.Status == "Upcoming" ? "#FCC43E" : (Model.Status == "Ongoing" ? "#38F9D7" : "#A098AE")); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                @Model.Status
+            </span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+        <!-- Left Column: Main Info -->
+        <div>
+            <div class="content-card" style="padding: 0; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.05);">
+                <!-- Cover Image -->
+                <div style="height: 350px; position: relative;">
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <img src="@Model.ImagePath" style="width: 100%; height: 100%; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                             <i class="fas fa-calendar-alt" style="font-size: 80px; opacity: 0.3;"></i>
+                        </div>
+                    }
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white;">
+                        <span style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-bottom: 12px; display: inline-block;">
+                            @Model.Category
+                        </span>
+                        <h1 style="margin: 0; font-size: 32px; font-weight: 800;">@Model.Title</h1>
+                    </div>
+                </div>
+
+                <div style="padding: 32px;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--text-dark);">@Localizer["Description"]</h3>
+                    <p style="margin: 0 0 32px 0; font-size: 15px; color: var(--text-gray); line-height: 1.8; white-space: pre-line;">
+                        @Model.Description
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(Model.Requirements))
+                    {
+                        <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--text-dark);">@Localizer["Requirements"]</h3>
+                        <div style="background: #F8F9FF; padding: 24px; border-radius: 12px; border-right: 4px solid var(--primary);">
+                            <p style="margin: 0; font-size: 14px; color: var(--text-dark); line-height: 1.6;">@Model.Requirements</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Details Pane -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Key Info Card -->
+            <div class="content-card" style="padding: 24px; border-radius: 20px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.05);">
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFF0F0; display: flex; align-items: center; justify-content: center; color: #FF5252;">
+                            <i class="far fa-calendar-alt" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Date"]</div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-dark);">@Model.StartDate.ToString("MMMM dd, yyyy")</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #F0F4FF; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <i class="far fa-clock" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Time"]</div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-dark);">
+                                @(Model.StartTime?.ToString("HH:mm") ?? Model.StartDate.ToString("HH:mm")) - 
+                                @(Model.EndTime?.ToString("HH:mm") ?? Model.EndDate.ToString("HH:mm"))
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #FFF9F0; display: flex; align-items: center; justify-content: center; color: #FCC43E;">
+                            <i class="fas fa-map-marker-alt" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Location"]</div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-dark);">@Model.Location</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #F0FFF4; display: flex; align-items: center; justify-content: center; color: #38F9D7;">
+                            <i class="fas fa-users" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Capacity"]</div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-dark);">
+                                @if (Model.IsUnlimitedCapacity)
+                                {
+                                    <text>@Model.CurrentParticipants / @Localizer["Unlimited"]</text>
+                                }
+                                else
+                                {
+                                    <text>@Model.CurrentParticipants / @Model.Capacity @Localizer["Participants"]</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Fee > 0)
+                    {
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #F0F0FF; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                                <i class="fas fa-tag" style="font-size: 20px;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Fee"]</div>
+                                <div style="font-size: 14px; font-weight: 600; color: var(--text-dark);">@Model.Fee?.ToString("C")</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #F0FFF4; display: flex; align-items: center; justify-content: center; color: #38F9D7;">
+                                <i class="fas fa-gift" style="font-size: 20px;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--text-gray);">@Localizer["Fee"]</div>
+                                <div style="font-size: 14px; font-weight: 600; color: #38F9D7;">@Localizer["Free"]</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Organizer Card -->
+            <div class="content-card" style="padding: 24px; border-radius: 20px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.05);">
+                <h4 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; color: var(--text-dark);">@Localizer["Organizer"]</h4>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    @if (!string.IsNullOrEmpty(Model.ManagedBy?.ProfilePicturePath))
+                    {
+                        <img src="@Model.ManagedBy.ProfilePicturePath" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <img src="https://ui-avatars.com/api/?name=@Model.ManagedBy?.Name&background=random" style="width: 48px; height: 48px; border-radius: 12px; object-fit: cover;">
+                    }
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-dark);">@Model.ManagedBy?.Name</div>
+                        <div style="font-size: 12px; color: var(--text-gray);">@Model.ManagedBy?.Role</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Status Card -->
+            @if (isStudent)
+            {
+                <div class="content-card" style="padding: 24px; border-radius: 20px; background: var(--primary); color: white; box-shadow: 0 8px 24px rgba(77, 68, 181, 0.25);">
+                    @if (Model.RequiresRegistration && Model.RegistrationDeadline.HasValue)
+                    {
+                        <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">@Localizer["RegistrationDeadline"]</div>
+                        <div style="font-size: 16px; font-weight: 700; margin-bottom: 20px;">
+                            @(Model.RegistrationDeadline?.ToString("MMM dd, yyyy HH:mm") ?? Localizer["TBA"])
+                        </div>
+                    }
+                    
+                    @if (ViewBag.IsRejected == true)
+                    {
+                        <div style="text-align: center; font-size: 14px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; color: #FF5252;">
+                            <i class="fas fa-times-circle"></i> @Localizer["RegistrationRejected"]
+                        </div>
+                    }
+                    else if (isRegistered && ViewBag.IsRejected != true)
+                    {
+                        <div style="text-align: center; font-size: 14px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="fas fa-check-circle"></i> @Localizer["AlreadyRegistered"]
+                        </div>
+                        <form asp-action="CancelRegistration" asp-route-id="@ViewBag.ParticipationId" asp-route-activityId="@Model.Id" method="post" 
+                          onsubmit="confirmAction(event, this)"
+                          data-confirm-title="@Localizer["CancelRegistrationConfirm"]"
+                          data-confirm-text="@Localizer["ActionCannotBeUndone"]"
+                          data-confirm-icon="warning"
+                          data-confirm-yes="@Localizer["YesCancel"]"
+                          style="margin-top: 12px;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn" style="width: 100%; border: none; background: rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                <i class="fas fa-times" style="margin-right: 8px;"></i> @Localizer["CancelRegistration"]
+                            </button>
+                        </form>
+                    }
+                    else if (Model.Status == "Upcoming" && (Model.RegistrationDeadline == null || Model.RegistrationDeadline > DateTime.UtcNow))
+                    {
+                        var isCapacityFull = !Model.IsUnlimitedCapacity && Model.Capacity.HasValue && Model.CurrentParticipants >= Model.Capacity.Value;
+                        
+                        if (!isCapacityFull)
+                        {
+                            <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">@Localizer["Status"]</div>
+                            <div style="font-size: 16px; font-weight: 700; margin-bottom: 20px;">@Localizer["RegistrationOpen"]</div>
+                            <form asp-action="Register" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn" style="width: 100%; border: none; background: white; color: var(--primary); padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
+                                    <i class="fas fa-user-plus" style="margin-right: 8px;"></i> @Localizer["RegisterNow"]
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">@Localizer["Status"]</div>
+                            <div style="font-size: 16px; font-weight: 700; margin-bottom: 20px;">@Localizer["RegistrationClosed"]</div>
+                            <div style="text-align: center; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px;">
+                                <i class="fas fa-exclamation-triangle"></i> @Localizer["RegistrationFull"]
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div style="font-size: 13px; opacity: 0.8; margin-bottom: 8px;">@Localizer["Status"]</div>
+                        <div style="font-size: 16px; font-weight: 700; margin-bottom: 20px;">@Localizer["RegistrationClosed"]</div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px;">
+                            <i class="fas fa-clock"></i> @Localizer["RegistrationClosed"]
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-card {
+        transition: transform 0.2s;
+    }
+    
+    html[dir="rtl"] .content-card div[style*="border-right"] {
+        border-right: 4px solid var(--primary);
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+</style>

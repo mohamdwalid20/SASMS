@@ -1,0 +1,160 @@
+@model IEnumerable<SASMS.Models.SystemBackup>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+
+<style>
+    .backup-container { font-family: 'Inter', sans-serif; }
+    .backup-header { margin-bottom: 25px; }
+    .backup-title { font-size: 22px; font-weight: 700; color: #1a1c21; display: flex; align-items: center; gap: 12px; }
+    .backup-actions { display: flex; gap: 15px; margin-bottom: 30px; }
+    
+    .backup-card { 
+        background: #fff; 
+        border: 1px solid #e2e8f0; 
+        border-radius: 12px; 
+        padding: 20px;
+        transition: 0.2s;
+    }
+    
+    .backup-btn {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    
+    .btn-db { background: #4d44b5; color: white; }
+    .btn-db:hover { background: #3d35a0; transform: translateY(-2px); }
+    
+    .btn-files { background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; }
+    .btn-files:hover { background: #f1f5f9; transform: translateY(-2px); }
+
+    .backup-table { width: 100%; border-collapse: collapse; }
+    .backup-table th { 
+        text-align: left; 
+        padding: 12px 15px; 
+        font-size: 11px; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        color: #64748b; 
+        border-bottom: 2px solid #f1f5f9; 
+    }
+    .backup-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #1e293b; }
+    
+    .type-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .type-db { background: #eef2ff; color: #4d44b5; }
+    .type-files { background: #f0fdf4; color: #15803d; }
+    
+    .action-icons { display: flex; gap: 10px; justify-content: flex-end; }
+    .icon-btn { 
+        width: 32px; height: 32px; 
+        display: flex; align-items: center; justify-content: center; 
+        border-radius: 8px; border: 1px solid #e2e8f0; 
+        color: #64748b; transition: 0.2s; cursor: pointer;
+    }
+    .icon-btn:hover { background: #f8fafc; color: #4d44b5; border-color: #4d44b5; }
+    .icon-delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+</style>
+
+<div class="backup-container">
+    <div class="backup-header">
+        <h3 class="backup-title">
+            <i class="fas fa-database text-primary"></i>
+            @Localizer["SystemBackup"]
+        </h3>
+        <p class="text-muted small">@Localizer["SecureSnapshotOfDatabaseAndMediaFiles"]</p>
+    </div>
+
+    <div class="backup-actions">
+        <button onclick="triggerBackup('Database')" class="backup-btn btn-db">
+            <i class="fas fa-hdd"></i>
+            @Localizer["GenerateDBBackup"]
+        </button>
+        <button onclick="triggerBackup('Files')" class="backup-btn btn-files">
+            <i class="fas fa-file-archive"></i>
+            @Localizer["GenerateFilesBackup"]
+        </button>
+    </div>
+
+    <div class="backup-card">
+        <div class="table-responsive">
+            <table class="backup-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Timestamp"]</th>
+                        <th>@Localizer["FileName"]</th>
+                        <th>@Localizer["Type"]</th>
+                        <th>@Localizer["Size"]</th>
+                        <th class="text-end">@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-box-open fa-2x mb-3 d-block opacity-25"></i>
+                                @Localizer["NoBackupsFound"]
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@item.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</div>
+                                    <div class="small text-muted">@item.CreatedAt.ToLocalTime().ToString("hh:mm tt")</div>
+                                </td>
+                                <td class="text-truncate" style="max-width: 250px;">@item.FileName</td>
+                                <td>
+                                    <span class="type-badge @(item.Type == "Database" ? "type-db" : "type-files")">
+                                        @Localizer[item.Type]
+                                    </span>
+                                </td>
+                                <td>@FormatSize(item.SizeBytes)</td>
+                                <td>
+                                    <div class="action-icons">
+                                        <a href="/Admin/DownloadBackup/@item.Id" class="icon-btn" title="@Localizer["Download"]">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <button onclick="deleteBackup(@item.Id)" class="icon-btn icon-delete" title="@Localizer["Delete"]">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string FormatSize(long bytes)
+    {
+        string[] suffix = { "B", "KB", "MB", "GB", "TB" };
+        int i;
+        double dblSByte = bytes;
+        for (i = 0; i < suffix.Length && bytes >= 1024; i++, bytes /= 1024)
+        {
+            dblSByte = bytes / 1024.0;
+        }
+        return $"{dblSByte:0.##} {suffix[i]}";
+    }
+}

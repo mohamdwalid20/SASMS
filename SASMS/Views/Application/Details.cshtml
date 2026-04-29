@@ -1,0 +1,447 @@
+@model SASMS.Models.Application
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["Application Details"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .action-buttons-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .action-btn {
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .action-btn:active {
+        transform: translateY(0);
+    }
+
+    .btn-accept {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+    }
+
+    .btn-accept:hover {
+        background: linear-gradient(135deg, #45a049, #3d8b40);
+    }
+
+    .btn-reject {
+        background: linear-gradient(135deg, #FF4D4F, #d43f3a);
+        color: white;
+    }
+
+    .btn-reject:hover {
+        background: linear-gradient(135deg, #d43f3a, #c9302c);
+    }
+
+    .btn-pass {
+        background: linear-gradient(135deg, #4361ee, #3651d3);
+        color: white;
+    }
+
+    .btn-pass:hover {
+        background: linear-gradient(135deg, #3651d3, #2d41b8);
+    }
+
+    .btn-warning-custom {
+        background: linear-gradient(135deg, #FCC43E, #e0a910);
+        color: white;
+    }
+
+    .btn-warning-custom:hover {
+        background: linear-gradient(135deg, #e0a910, #c8930e);
+    }
+
+    .btn-info-custom {
+        background: linear-gradient(135deg, #4895ef, #3a7ed4);
+        color: white;
+    }
+
+    .btn-info-custom:hover {
+        background: linear-gradient(135deg, #3a7ed4, #2d6cbd);
+    }
+
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .header-left h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font-size: 13px;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: var(--text-gray);
+        font-size: 16px;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-light);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--text-gray);
+    }
+</style>
+
+<div class="header-container">
+    <div class="header-left">
+        <h2 class="page-title">@Localizer["Application Details"]</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action(@Localizer["List"], @Localizer["Application"])">@Localizer["Admissions"]</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.ApplicationNumber</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="header-actions">
+        @if (Model.Status == "Pending")
+        {
+            <div class="action-buttons-group">
+                <button onclick="updateStatus(@Model.Id, 'Rejected')" class="action-btn btn-reject">
+                    <i class="fas fa-times-circle"></i> @Localizer["Reject"]
+                </button>
+                <button onclick="updateStatus(@Model.Id, 'AcceptedForExam')" class="action-btn btn-accept">
+                    <i class="fas fa-clipboard-check"></i>  @Localizer["Accept For Exam"]
+                </button>
+            </div>
+        }
+        else if (Model.Status == "AcceptedForExam")
+        {
+            <div class="action-buttons-group">
+                <button onclick="updateStatus(@Model.Id, 'Rejected')" class="action-btn btn-reject">
+                    <i class="fas fa-times-circle"></i>  @Localizer["Fail"]
+                </button>
+                <button onclick="updateStatus(@Model.Id, 'PassedInternalExam')" class="action-btn btn-warning-custom">
+                    <i class="fas fa-file-alt"></i>  @Localizer["Passed Internal Exam"]
+                </button>
+            </div>
+        }
+        else if (Model.Status == "PassedInternalExam")
+        {
+            <div class="action-buttons-group">
+                <button onclick="updateStatus(@Model.Id, 'Rejected')" class="action-btn btn-reject">
+                    <i class="fas fa-times-circle"></i>  @Localizer["Fail"]
+                </button>
+                <button onclick="updateStatus(@Model.Id, 'PassedMinistryExam')" class="action-btn btn-info-custom">
+                    <i class="fas fa-university"></i>  @Localizer["Passed Ministry Exam"]
+                </button>
+            </div>
+        }
+        else if (Model.Status == "PassedMinistryExam")
+        {
+            <div class="action-buttons-group">
+                <button onclick="updateStatus(@Model.Id, 'Rejected')" class="action-btn btn-reject">
+                    <i class="fas fa-times-circle"></i> @Localizer["Reject"]
+                </button>
+                <button onclick="updateStatus(@Model.Id, 'Approved')" class="action-btn btn-accept">
+                    <i class="fas fa-check-circle"></i> @Localizer["Final Admission"]
+                </button>
+            </div>
+        }
+        else
+        {
+            var badgeClass = "st-overdue"; 
+            if (Model.Status == "Approved") { badgeClass = "st-paid"; }
+            if (Model.Status == "Pending") { badgeClass = "st-pending"; }
+            if (Model.Status.Contains("Passed") || Model.Status == "AcceptedForExam") { badgeClass = "st-pending"; }
+
+            <span class="status-badge @badgeClass">
+                <span class="dot"></span> @Model.Status
+            </span>
+        }
+    </div>
+</div>
+
+<div class="details-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 24px;">
+    
+    <!-- Left Column -->
+    <div class="main-info">
+        
+        <!-- Applicant Info -->
+        <div class="card" style="background: white; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <h4 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-user" style="margin-right: 8px; color: var(--primary);"></i>  @Localizer["Applicant Information"]
+            </h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Full Name"]</label>
+                    <div style="font-weight: 600; font-size: 14px;">@Model.Applicant.User.Name</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["National ID"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.User.NationalId</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Date Of Birth"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.DateOfBirth.ToString("dd MMM yyyy")</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Gender"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.Gender</div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Address"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.Address</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Phone"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.User.PhoneNumber</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Email"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.User.Email</div>
+                </div>
+
+                @if (Model.DynamicFieldValues != null && Model.DynamicFieldValues.Any(v => v.Field.Section == SASMS.Models.FormSection.Personal))
+                {
+                    foreach (var val in Model.DynamicFieldValues.Where(v => v.Field.Section == SASMS.Models.FormSection.Personal).OrderBy(v => v.Field.DisplayOrder))
+                    {
+                        <div class="info-item">
+                            <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@val.Field.Label</label>
+                            @if (val.Field.Type == SASMS.Models.FieldType.File && !string.IsNullOrEmpty(val.Value))
+                            {
+                                <a href="@val.Value" target="_blank" class="btn-info-custom" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-file-image"></i> @Localizer["View File"]
+                                </a>
+                            }
+                            else
+                            {
+                                <div style="font-size: 14px; font-weight: 500;">@(string.IsNullOrEmpty(val.Value) ? "---" : val.Value)</div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Academic Info -->
+        <div class="card" style="background: white; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <h4 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-graduation-cap" style="margin-right: 8px; color: var(--secondary);"></i>@Localizer["Academic Information"]
+            </h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Previous School"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.Grade</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Preferred Department"]</label>
+                    <div style="font-size: 14px; color: var(--primary); font-weight: 600;">@Model.PreferredDepartment.Name</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; background: #FAFAFB; padding: 16px; border-radius: 12px;">
+                <h5 style="font-size: 13px; margin-bottom: 12px;">@Localizer["Detailed Scores"]</h5>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center;">
+                    <div class="score-box">
+                        <div style="font-size: 11px; color: var(--text-gray);">@Localizer["Primary"]</div>
+                        <div style="font-weight: 700; color: var(--text-dark);">@Model.Applicant.GradeOfPrimarySchool</div>
+                    </div>
+                    <div class="score-box">
+                        <div style="font-size: 11px; color: var(--text-gray);">@Localizer["English"]</div>
+                        <div style="font-weight: 700; color: var(--text-dark);">@Model.Applicant.GradeOfEnglishExam</div>
+                    </div>
+                    <div class="score-box">
+                        <div style="font-size: 11px; color: var(--text-gray);">@Localizer["Math"]</div>
+                        <div style="font-weight: 700; color: var(--text-dark);">@Model.Applicant.GradeOfMathExam</div>
+                    </div>
+                    <div class="score-box">
+                        <div style="font-size: 11px; color: var(--text-gray);">@Localizer["Science"]</div>
+                        <div style="font-weight: 700; color: var(--text-dark);">@Model.Applicant.GradeOfScienceExam</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600;">@Localizer["Total Score"]</span>
+                    <span style="font-weight: 700; color: var(--primary); font-size: 16px;">@Model.TotalScore</span>
+                </div>
+            </div>
+
+            @if (Model.DynamicFieldValues != null && Model.DynamicFieldValues.Any(v => v.Field.Section == SASMS.Models.FormSection.Academic))
+            {
+                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+                    @foreach (var val in Model.DynamicFieldValues.Where(v => v.Field.Section == SASMS.Models.FormSection.Academic).OrderBy(v => v.Field.DisplayOrder))
+                    {
+                        <div class="info-item">
+                            <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@val.Field.Label</label>
+                            @if (val.Field.Type == SASMS.Models.FieldType.File && !string.IsNullOrEmpty(val.Value))
+                            {
+                                <a href="@val.Value" target="_blank" class="btn-info-custom" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-file-image"></i> @Localizer["View File"]
+                                </a>
+                            }
+                            else
+                            {
+                                <div style="font-size: 14px; font-weight: 500;">@(string.IsNullOrEmpty(val.Value) ? "---" : val.Value)</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="side-info">
+        <!-- Guardian Info -->
+        <div class="card" style="background: white; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <h4 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-user-shield" style="margin-right: 8px; color: #FF4D4F;"></i> @Localizer["Guardian"]
+            </h4>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                 <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Name"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.ParentName</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Relationship"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.Kinship</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Phone"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.ParentPhone</div>
+                </div>
+                <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@Localizer["Job"]</label>
+                    <div style="font-size: 14px;">@Model.Applicant.ParentMajor</div>
+                </div>
+
+                @if (Model.DynamicFieldValues != null && Model.DynamicFieldValues.Any(v => v.Field.Section == SASMS.Models.FormSection.Guardian))
+                {
+                    <div style="border-top: 1px dashed #f0f0f0; margin-top: 8px; padding-top: 16px; display: flex; flex-direction: column; gap: 16px;">
+                        @foreach (var val in Model.DynamicFieldValues.Where(v => v.Field.Section == SASMS.Models.FormSection.Guardian).OrderBy(v => v.Field.DisplayOrder))
+                        {
+                            <div class="info-item">
+                                <label style="display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 4px;">@val.Field.Label</label>
+                                @if (val.Field.Type == SASMS.Models.FieldType.File && !string.IsNullOrEmpty(val.Value))
+                                {
+                                    <a href="@val.Value" target="_blank" class="btn-info-custom" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-file-image"></i> @Localizer["View File"]
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div style="font-size: 14px; font-weight: 500;">@(string.IsNullOrEmpty(val.Value) ? "---" : val.Value)</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Application Meta -->
+        <div class="card" style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <h4 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px;">@Localizer["System Info"]</h4>
+            
+            <div class="info-item" style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; color: var(--text-gray);">@Localizer["Submitted On"]</label>
+                <div style="font-size: 13px;">@Model.ApplicationDate.ToString("MMM dd, yyyy HH:mm")</div>
+            </div>
+            
+             <div class="info-item" style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 12px; color: var(--text-gray);">@Localizer["Eligibility"]</label>
+                @if (Model.IsEligible)
+                {
+                    <span style="color: #52C41A; font-weight: 600; font-size: 13px;"><i class="fas fa-check-circle"></i>@Localizer["Eligible"]</span>
+                }
+                else
+                {
+                    <span style="color: #FF4D4F; font-weight: 600; font-size: 13px;"><i class="fas fa-times-circle"></i>@Localizer["Not Eligible"]</span>
+                }
+            </div>
+            
+            @if (Model.ReviewedBy != null)
+            {
+                 <div class="info-item">
+                    <label style="display: block; font-size: 12px; color: var(--text-gray);">@Localizer["Reviewed By"]</label>
+                    <div style="font-size: 13px;">@Model.ReviewedBy.Name</div>
+                    <div style="font-size: 11px; color: var(--text-gray);">@Model.UpdatedAt?.ToString("MMM dd, yyyy")</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateStatus(id, status) {
+            const actionText = status === 'Rejected' ? 'Reject' : 'Approve/Pass';
+            const actionVerb = status === 'Rejected' ? 'reject' : 'approve/pass';
+            
+            Swal.fire({
+                title: `Are you sure you want to ${actionVerb} this application?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: status === 'Rejected' ? '#FF5252' : '#4CAF50',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: `Yes, ${actionText} it!`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("UpdateStatus", "Application")',
+                        type: 'POST',
+                        data: { id: id, status: status, notes: '' },
+                        success: function(res) {
+                            if(res.success) {
+                                Swal.fire('Success!', 'Application status updated.', 'success').then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Error', "Error: " + res.message, 'error');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Update failed:", error);
+                            Swal.fire('Error', "An error occurred. Check console for details.", 'error');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

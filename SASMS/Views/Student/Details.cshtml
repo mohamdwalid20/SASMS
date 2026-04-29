@@ -1,0 +1,115 @@
+@model SASMS.Models.Student
+@using SASMS.Helpers
+
+@{
+    ViewData["Title"] = "Student Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="form-section" style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 class="header-title" style="margin: 0;">Student Details</h2>
+        <div style="display: flex; gap: 10px;">
+            <a href="@Url.Action("Edit", "Student", new { id = Model.Id })" class="form-btn" style="text-decoration: none; padding: 10px 20px;">Edit Student</a>
+            <a href="@Url.Action("List", "Student")" style="color: #A098AE; font-weight: 600; text-decoration: none; padding: 10px;">Back to List</a>
+        </div>
+    </div>
+
+    <!-- Student Profile Header -->
+    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid #333;">
+        <img src="@AvatarHelper.GetAvatarUrl(Model.User.Name, Model.ProfilePicturePath ?? Model.User.ProfilePicturePath)" 
+             alt="Profile Picture" 
+             style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+        
+        <div>
+            <h3 style="margin: 0 0 5px 0; color: var(--text-dark); font-size: 24px;">@Model.User.Name</h3>
+            <div style="color: var(--text-gray); margin-bottom: 10px;">@Model.User.Email</div>
+            <div style="display: flex; gap: 10px;">
+                <span style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">@Model.StudentId</span>
+                @if (Model.Status == "Active")
+                {
+                    <span style="background: #e8f7f0; color: #2ecc71; padding: 4px 12px; border-radius: 20px; font-size: 12px;">Active</span>
+                }
+                else
+                {
+                    <span style="background: #fdeaea; color: #e74c3c; padding: 4px 12px; border-radius: 20px; font-size: 12px;">@Model.Status</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <!-- Personal Info -->
+        <div>
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 16px; font-weight: 600; border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: inline-block;">Personal Information</h4>
+            <div style="display: grid; gap: 15px;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">National ID</div>
+                    <div style="font-weight: 500;">@Model.User.NationalId</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Phone Number</div>
+                    <div style="font-weight: 500;">@Model.User.PhoneNumber</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Date of Birth</div>
+                    <div style="font-weight: 500;">@Model.DateOfBirth.ToString("MMM dd, yyyy")</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Gender</div>
+                    <div style="font-weight: 500;">@Model.Gender</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Address</div>
+                    <div style="font-weight: 500;">@Model.Address</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Info -->
+        <div>
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 16px; font-weight: 600; border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: inline-block;">Academic Information</h4>
+            <div style="display: grid; gap: 15px;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Department</div>
+                    <div style="font-weight: 500;">@Model.Department?.Name</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Class</div>
+                    <div style="font-weight: 500;">@(string.IsNullOrEmpty(Model.ClassName) ? "N/A" : Model.ClassName)</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Academic Year</div>
+                    <div style="font-weight: 500;">@(Model.AcademicYear?.Year ?? "N/A")</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Enrollment Date</div>
+                    <div style="font-weight: 500;">@Model.EnrollmentDate.ToString("MMM dd, yyyy")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guardian Info -->
+        <div style="grid-column: 1 / -1;">
+            <h4 style="color: var(--primary); margin-bottom: 20px; font-size: 16px; font-weight: 600; border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: inline-block;">Guardian Information</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Guardian Name</div>
+                    <div style="font-weight: 500;">@Model.ParentName <span style="font-size: 12px; color: #7f8c8d;">(@Model.Kinship)</span></div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Guardian Phone</div>
+                    <div style="font-weight: 500;">@Model.ParentPhone</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Emergency Contact</div>
+                    <div style="font-weight: 500;">@Model.EmergencyContact</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: var(--text-gray);">Emergency Phone</div>
+                    <div style="font-weight: 500;">@Model.EmergencyPhone</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,314 @@
+@model SASMS.ViewModels.DashboardViewModel
+@using Microsoft.Extensions.Localization
+
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["Dashboard"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Top Section: Chart + 4 Metric Cards -->
+@using SASMS.Models
+@{
+    var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    Enum.TryParse<UserRole>(roleClaim, out var userRole);
+    bool isAdmin = userRole == UserRole.Admin || userRole == UserRole.StudentAffairs;
+    bool isSupervisor = userRole == UserRole.Supervisor;
+    bool isActivityTeacher = userRole == UserRole.ActivityTeacher;
+}
+
+<!-- Top Section: Chart + Metric Cards -->
+<div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-bottom: 24px;">
+    
+    <!-- Main Chart: Role-Specific Overview -->
+    <div class="chart-card" style="height: 300px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">
+                @if (isAdmin) { @Localizer["SystemOverview"] }
+                else if (isSupervisor) { @Localizer["SupervisionOverview"] }
+                else { @Localizer["ActivityPerformance"] }
+            </h3>
+            <div id="chartLegend" style="display: flex; gap: 16px; align-items: center;">
+                <!-- HTML Legend will be injected here -->
+            </div>
+        </div>
+        <canvas id="systemOverviewChart"></canvas>
+    </div>
+
+    <!-- Metric Cards Grid (2x2) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        
+        @if (isAdmin)
+        {
+            <!-- Total Students -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["TotalStudents"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.TotalStudents.ToString("N0")</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">@Localizer["Active"]: @Model.ActiveStudents</div>
+            </div>
+
+            <!-- New Applications -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["NewApplications"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.PendingApplications</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">+@Model.NewApplicationsThisMonth @Localizer["ThisMonth"]</div>
+            </div>
+
+            <!-- Total Fees Collected -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["TotalFees"]</div>
+                <div style="font-size: 20px; font-weight: 700; color: var(--text-dark);">@Model.TotalFeesCollected.ToString("N0")</div>
+                <div style="margin-top: 8px; color: #FF5252; font-size: 10px; font-weight: 600;">@Localizer["Outstanding"]: @Model.OutstandingFees.ToString("N0")</div>
+            </div>
+
+            <!-- Pending Complaints -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["PendingComplaints"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.PendingComplaints</div>
+                <div style="margin-top: 8px; color: #FF5252; font-size: 11px; font-weight: 600;">@Localizer["AttentionRequired"]</div>
+            </div>
+        }
+        else if (isSupervisor)
+        {
+            <!-- Total Students -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["TotalStudents"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.TotalStudents.ToString("N0")</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">@Localizer["Active"]: @Model.ActiveStudents</div>
+            </div>
+
+            <!-- Pending Complaints -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["UnresolvedComplaints"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.PendingComplaints</div>
+                <div style="margin-top: 8px; color: #FF5252; font-size: 11px; font-weight: 600;">@Localizer["HighPriority"]</div>
+            </div>
+
+            <!-- Pending Suggestions -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["NewSuggestions"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.PendingSuggestionsCount</div>
+                <div style="margin-top: 8px; color: var(--primary); font-size: 11px; font-weight: 600;">@Localizer["ReviewNeeded"]</div>
+            </div>
+
+            <!-- System Health -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["SystemAlerts"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">0</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">@Localizer["AllSystemsNormal"]</div>
+            </div>
+        }
+        else if (isActivityTeacher)
+        {
+            <!-- My Activities -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["ManagedActivities"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.MyManagedActivitiesCount</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">@Model.ActiveManagedActivities @Localizer["Active"]</div>
+            </div>
+
+            <!-- Total Participants -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["TotalParticipants"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.TotalParticipantsInMyActivities</div>
+                <div style="margin-top: 8px; color: var(--primary); font-size: 11px; font-weight: 600;">@Localizer["AcrossAllActivities"]</div>
+            </div>
+
+            <!-- New Sign-ups -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["NewJoiners"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">@Model.NewParticipantsThisMonth</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">@Localizer["ThisMonth"]</div>
+            </div>
+
+            <!-- Attendance Rate -->
+            <div class="metric-card">
+                <div style="font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 8px;">@Localizer["AverageAttendance"]</div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--text-dark);">85%</div>
+                <div style="margin-top: 8px; color: #4CAF50; font-size: 11px; font-weight: 600;">@Localizer["AboveTarget"]</div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<!-- Recent System Activities Table -->
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">@Localizer["RecentActivities"]</h3>
+        
+   
+    </div>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th style="width: 20%;">@Localizer["Type"]</th>
+                <th style="width: 60%;">@Localizer["Description"]</th>
+                <th style="width: 20%;">@Localizer["Date"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.RecentActivities != null && Model.RecentActivities.Any())
+            {
+                foreach (var activity in Model.RecentActivities)
+                {
+                    <tr class="row-item">
+                        <td>
+                            <span class="status-badge" style="background: @activity.BadgeColor; color: #333; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center;">
+                                <i class="fas @activity.Icon" style="margin-right: 6px;"></i> @activity.Type
+                            </span>
+                        </td>
+                        <td style="color: var(--text-dark); font-weight: 600;">@activity.Description</td>
+                        <td style="color: var(--text-gray); font-size: 13px;">@activity.Date.ToString("MMM dd, hh:mm tt")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 20px; color: var(--text-gray);">
+                        @Localizer["NoRecentActivities"]
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        // System Overview Chart (Multi-category Trend)
+        const ctx = document.getElementById('systemOverviewChart').getContext('2d');
+        const isRtl = document.documentElement.dir === 'rtl';
+        const months = @Html.Raw(Json.Serialize(Model.MonthlyStudents.Select(m => m.Month)));
+
+        const chartDatasets = [];
+
+        @if (isAdmin) {
+            <text>
+            chartDatasets.push({
+                label: '@Localizer["NewStudents"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlyStudents.Select(m => m.Count))),
+                borderColor: '#FCC43E', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#FCC43E'
+            });
+            chartDatasets.push({
+                label: '@Localizer["NewApplications"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlyApplications.Select(m => m.Count))),
+                borderColor: '#4CAF50', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#4CAF50'
+            });
+            chartDatasets.push({
+                label: '@Localizer["Complaints"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlyComplaints.Select(m => m.Count))),
+                borderColor: '#FF5252', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#FF5252'
+            });
+            </text>
+        }
+        else if (isSupervisor) {
+            <text>
+            chartDatasets.push({
+                label: '@Localizer["Complaints"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlyComplaints.Select(m => m.Count))),
+                borderColor: '#FF5252', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#FF5252'
+            });
+            chartDatasets.push({
+                label: '@Localizer["Suggestions"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlySuggestions.Select(m => m.Count))),
+                borderColor: '#4CAF50', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#4CAF50'
+            });
+            chartDatasets.push({
+                label: '@Localizer["NewStudents"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlyStudents.Select(m => m.Count))),
+                borderColor: '#FCC43E', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#FCC43E'
+            });
+            </text>
+        }
+        else if (isActivityTeacher) {
+            <text>
+            chartDatasets.push({
+                label: '@Localizer["ActivityParticipants"]',
+                data: @Html.Raw(Json.Serialize(Model.MonthlyParticipants.Select(m => m.Count))),
+                borderColor: '#FCC43E', backgroundColor: 'transparent', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#FCC43E'
+            });
+            </text>
+        }
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: chartDatasets
+            },
+            options: {
+                rtl: isRtl,
+                textDirection: isRtl ? 'rtl' : 'ltr',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'white',
+                        titleColor: '#303972',
+                        bodyColor: '#303972',
+                        borderColor: '#E5E7EB',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
+                        boxPadding: 6
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#A098AE', font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#F0F0F0', drawBorder: false },
+                        ticks: {
+                            color: '#A098AE',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                if (Math.floor(value) === value) return value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Custom HTML Legend Implementation
+        const legendContainer = document.getElementById('chartLegend');
+        chartDatasets.forEach((dataset, index) => {
+            const legendItem = document.createElement('div');
+            legendItem.style.cssText = `
+                display: flex; 
+                align-items: center; 
+                gap: 8px; 
+                cursor: pointer; 
+                font-size: 12px; 
+                font-weight: 500; 
+                color: var(--text-gray);
+                user-select: none;
+                transition: opacity 0.2s;
+            `;
+            
+            legendItem.innerHTML = `
+                <span style="width: 10px; height: 10px; border-radius: 50%; background-color: ${dataset.borderColor}; display: inline-block;"></span>
+                <span>${dataset.label}</span>
+            `;
+ 
+            legendItem.onclick = () => {
+                const chart = Chart.getChart('systemOverviewChart');
+                const meta = chart.getDatasetMeta(index);
+                meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                legendItem.style.opacity = (meta.hidden) ? '0.4' : '1';
+                legendItem.style.textDecoration = (meta.hidden) ? 'line-through' : 'none';
+                chart.update();
+            };
+ 
+            legendContainer.appendChild(legendItem);
+        });
+    </script>
+}

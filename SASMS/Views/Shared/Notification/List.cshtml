@@ -1,0 +1,50 @@
+@model IEnumerable<SASMS.Models.Notification>
+
+@{
+    ViewData["Title"] = "All Notifications";
+    Layout = ViewData["Layout"]?.ToString() ?? "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0;">All Notifications</h3>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div style="padding: 8px 0;">
+            @foreach (var note in Model)
+            {
+                <div style="padding: 16px 20px; display: flex; gap: 16px; background: @(note.IsRead ? "transparent" : "#F8F9FF"); border-left: 3px solid @(note.IsRead ? "#E5E7EB" : "var(--primary)"); margin-bottom: 12px; border-radius: 8px; transition: 0.2s;" @(note.IsRead ? "" : "style='font-weight: 600;'")>
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0;">
+                        <i class="fas @(note.Type == "Info" ? "fa-info-circle" : note.Type == "Success" ? "fa-check-circle" : note.Type == "Alert" ? "fa-bell" : "fa-exclamation-circle")"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 700; color: var(--text-dark);">@note.Title</h4>
+                                <span style="font-size: 11px; padding: 4px 8px; border-radius: 12px; background: @(note.Category == "Complaint" ? "#FFF4E5" : note.Category == "Application" ? "#E8F0FE" : "#E6F4EA"); color: @(note.Category == "Complaint" ? "#FCC43E" : note.Category == "Application" ? "#4CACFF" : "#4CAF50"); font-weight: 600;">@note.Category</span>
+                            </div>
+                            <span style="font-size: 12px; color: var(--text-gray);">@note.CreatedAt.ToString("MMM dd, hh:mm tt")</span>
+                        </div>
+                        <p style="margin: 0; font-size: 14px; color: var(--text-dark); line-height: 1.5;">@note.Message</p>
+                        @if (!string.IsNullOrEmpty(note.ActionUrl))
+                        {
+                            <a href="@note.ActionUrl" style="font-size: 13px; color: var(--primary); font-weight: 600; text-decoration: none; margin-top: 8px; display: inline-block;">
+                                View Details <i class="fas fa-arrow-right" style="font-size: 11px; margin-left: 4px;"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="padding: 60px 20px; text-align: center; color: var(--text-gray);">
+            <i class="fas fa-bell-slash" style="font-size: 56px; display: block; margin-bottom: 16px; opacity: 0.3;"></i>
+            <p style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">No notifications yet</p>
+            <p style="font-size: 13px; opacity: 0.7;">You'll be notified when something important happens</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,233 @@
+@model IEnumerable<SASMS.ViewModels.StudentViewModel>
+@using SASMS.Helpers
+@using Microsoft.Extensions.Localization
+
+@inject IStringLocalizer<SharedResources> Localizer
+@inject SASMS.Services.IRiskDetectionService RiskService
+
+@{
+    ViewData["Title"] = Localizer["Students"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="table-card">
+    <div class="table-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="@Url.Action("Index", "Student")" class="btn-back" style="color: var(--text-gray); font-size: 20px; transition: 0.3s;"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <h3 class="widget-title" style="margin: 0;">@Localizer["StudentsDirectory"]</h3>
+                @if (!string.IsNullOrEmpty(ViewBag.DepartmentName))
+                {
+                    <div style="font-size: 13px; color: var(--primary); font-weight: 600;">@ViewBag.DepartmentName</div>
+                }
+            </div>
+            <button type="button" id="bulkDeleteBtn" class="dropdown-btn" style="background: #e74c3c; color: white; display: none; padding: 8px 16px; border: none; align-items: center; gap: 8px; font-size: 13px;">
+                <i class="fas fa-trash-alt"></i> @Localizer["DeleteSelected"] (<span id="selectedCount">0</span>)
+            </button>
+        </div>
+        
+        <div class="filter-bar">
+            <form method="get" id="searchForm" style="display: flex; align-items: center; gap: 16px;">
+                <div class="search-filter">
+                    <i class="fas fa-search" style="color: #A098AE;"></i>
+                    <input type="text" id="searchInput" name="search" value="@ViewBag.Search" placeholder="@Localizer["SearchPlaceholder"]">
+                    <input type="hidden" name="departmentId" value="@ViewBag.SelectedDepartmentId" />
+                </div>
+                
+                <select name="status" onchange="this.form.submit()" class="dropdown-btn" style="border-radius: 8px;">
+                    <option value="">@Localizer["AllStatus"]</option>
+                    <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">@Localizer["Active"]</option>
+                    <option value="Inactive" selected="@(ViewBag.StatusFilter == "Inactive")">@Localizer["Inactive"]</option>
+                    <option value="Suspended" selected="@(ViewBag.StatusFilter == "Suspended")">@Localizer["Suspended"]</option>
+                </select>
+            </form>
+             <a asp-action="Create" class="dropdown-btn" style="background: var(--primary); color: white; text-decoration: none; border: none;">
+                <i class="fas fa-plus"></i> @Localizer["AddStudent"]
+            </a>
+        </div>
+    </div>
+
+    <form id="bulkDeleteForm" asp-action="BulkDelete" method="post">
+        <table class="custom-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" style="width: 18px; height: 18px; accent-color: var(--primary);"></th>
+                    <th>@Localizer["Student"]</th>
+                    <th>ID</th>
+                    <th>@Localizer["CurrentClass"]</th>
+                    <th>@Localizer["Department"]</th>
+                    <th>@Localizer["GuardianContact"]</th>
+                    <th>@Localizer["Status"]</th>
+                    <th>@Localizer["DateJoined"]</th>
+                    <th>@Localizer["Action"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="row-item">
+                        <td><input type="checkbox" name="ids" value="@item.Id" class="item-checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);"></td>
+                        <td class="user-cell">
+                            <img src="@AvatarHelper.GetAvatarUrl(item.Name, item.ProfilePicturePath)" alt="Avatar">
+                            <div class="user-meta">
+                                <div class="d-flex align-items-center gap-2">
+                                    @item.Name
+                                    @if (await RiskService.HasActiveAlertAsync(item.Id))
+                                    {
+                                        <span class="dot" title="@Localizer["Risk Detected"]" style="background: var(--accent-orange); width: 10px; height: 10px; margin-left: 5px;"></span>
+                                    }
+                                </div>
+                                <div style="font-size: 11px;">@item.Email</div>
+                            </div>
+                        </td>
+                        <td style="font-weight: 600; color: var(--primary);">@item.StudentId</td>
+                        <td>@item.ClassName</td>
+                        <td>@item.DepartmentName</td>
+                        <td>
+                            <div style="font-weight: 500;">@item.GuardianName</div>
+                            <div style="font-size: 11px; color: var(--text-gray);">@item.GuardianPhone</div>
+                        </td>
+                        <td>
+                            @if (item.Status == "Active")
+                            {
+                                <span class="status-badge st-paid"><span class="dot"></span> @Localizer["Active"]</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge st-overdue"><span class="dot"></span> @item.Status</span>
+                            }
+                        </td>
+                        <td>@item.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            <a href="@Url.Action("Details", "Student", new { id = item.Id })" class="action-btn"><i class="far fa-eye"></i></a>
+                            <a href="@Url.Action("Edit", "Student", new { id = item.Id })" class="action-btn"><i class="far fa-edit"></i></a>
+                            <button type="button" class="action-btn delete-btn" data-id="@item.Id" data-name="@item.Name"><i class="far fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </form>
+    @if (!Model.Any())
+    {
+        <div style="padding: 40px; text-align: center; color: #A098AE;">@Localizer["NoDataFound"]</div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 12px; width: 400px; max-width: 90%;">
+        <h4 style="margin-top: 0; color: #e74c3c;">@Localizer["ConfirmDelete"]</h4>
+        <p>@Localizer["DeleteConfirmationFull"] <strong id="deleteItemName"></strong></p>
+        <p style="font-size: 13px; color: #7f8c8d;">@Localizer["DeleteWarning"]</p>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" id="cancelDelete" style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer;">@Localizer["Cancel"]</button>
+            <form id="deleteForm" asp-action="Delete" method="post">
+                <input type="hidden" name="id" id="deleteItemId" />
+                <button type="submit" style="padding: 8px 16px; border: none; background: #e74c3c; color: white; border-radius: 6px; cursor: pointer;">@Localizer["Delete"]</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- Bulk Delete Logic ---
+        const selectAll = document.getElementById("selectAll");
+        const itemCheckboxes = document.querySelectorAll(".item-checkbox");
+        const bulkDeleteBtn = document.getElementById("bulkDeleteBtn");
+        const selectedCount = document.getElementById("selectedCount");
+        const bulkDeleteForm = document.getElementById("bulkDeleteForm");
+
+        function updateBulkDeleteBtn() {
+            const count = document.querySelectorAll(".item-checkbox:checked").length;
+            if (count > 0) {
+                bulkDeleteBtn.style.display = "flex";
+                selectedCount.innerText = count;
+            } else {
+                bulkDeleteBtn.style.display = "none";
+            }
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener("change", function () {
+                itemCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+                updateBulkDeleteBtn();
+            });
+        }
+
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener("change", function () {
+                 // Check if all are checked to update selectAll
+                const allChecked = document.querySelectorAll(".item-checkbox:checked").length === itemCheckboxes.length;
+                if (selectAll) selectAll.checked = allChecked;
+                updateBulkDeleteBtn();
+            });
+        });
+
+        if (bulkDeleteBtn) {
+            bulkDeleteBtn.addEventListener("click", function() {
+                Swal.fire({
+                    title: '@Localizer["BulkDeleteConfirmation"]',
+                    text: '@Localizer["ActionCannotBeUndone"]',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: '@Localizer["YesDelete"]'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        bulkDeleteForm.submit();
+                    }
+                });
+            });
+        }
+
+        // --- Single Delete Modal Logic ---
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const deleteItemId = document.getElementById('deleteItemId');
+        const deleteItemName = document.getElementById('deleteItemName');
+
+        deleteButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent accidental form submission if inside a form
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                
+                deleteItemId.value = id;
+                deleteItemName.textContent = name;
+                
+                deleteModal.style.display = 'flex';
+            });
+        });
+
+        if (cancelDelete) {
+            cancelDelete.addEventListener('click', function() {
+                deleteModal.style.display = 'none';
+            });
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target == deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+        });
+        
+        // --- Auto Search Debounce ---
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        let searchTimeout;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    searchForm.submit();
+                }, 500);
+            });
+        }
+    });
+</script>

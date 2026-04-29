@@ -1,0 +1,294 @@
+@model IEnumerable<SASMS.Models.Complaint>
+
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["MyComplaints"];
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="dashboard-header-modern">
+    <div>
+        <h1 class="page-title">@Localizer["ComplaintsSuggestions"]</h1>
+        <p class="page-subtitle">@Localizer["ComplaintsSubtitle"]</p>
+    </div>
+    <button onclick="document.getElementById('complaintForm').scrollIntoView({behavior: 'smooth'})" class="form-btn" style="width: auto;">
+        <i class="fas fa-plus"></i> @Localizer["NewComplaint"]
+    </button>
+</div>
+
+<!-- History Section -->
+<div class="content-card" style="margin-bottom: 30px;">
+    <h3 class="card-title" style="margin-bottom: 20px;">@Localizer["ComplaintHistory"]</h3>
+    
+    @if (!Model.Any())
+    {
+        <div style="text-align: center; padding: 40px; color: var(--text-gray);">
+            <i class="fas fa-clipboard-check" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+            @Localizer["NoComplaintsYet"]
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="custom-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Title"]</th>
+                        <th>@Localizer["Category"]</th>
+                        <th>@Localizer["Date"]</th>
+                        <th>@Localizer["Status"]</th>
+                        <th>@Localizer["Response"]</th>
+                        <th>@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div id="title-@item.Id" style="font-weight: 500;">@item.Title</div>
+                                <div style="font-size: 11px; color: var(--text-gray);">
+                                    @Localizer["PriorityLabel"]: <span id="priority-@item.Id" class="badge badge-@item.Priority.ToLower()" data-priority="@item.Priority">@Localizer[item.Priority]</span>
+                                </div>
+                                <div id="desc-@item.Id" style="display:none;">@item.Description</div>
+                                <div id="cat-@item.Id" style="display:none;" data-category="@item.Category">@item.Category</div>
+                            </td>
+                            <td>@item.Category</td>
+                            <td>@item.ComplaintDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (item.Status == "Pending")
+                                {
+                                    <span class="status-badge st-pending"><span class="dot"></span> @Localizer["Pending"]</span>
+                                }
+                                else if (item.Status == "Resolved")
+                                {
+                                    <span class="status-badge st-paid"><span class="dot"></span> @Localizer["Resolved"]</span>
+                                }
+                                else if (item.Status == "Rejected" || item.Status == "Closed")
+                                {
+                                    <span class="status-badge st-overdue"><span class="dot"></span> @Localizer[item.Status]</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge st-pending"><span class="dot"></span> @Localizer[item.Status]</span>
+                                }
+                            </td>
+                            <td style="max-width: 250px;">
+                                @if (!string.IsNullOrEmpty(item.Response))
+                                {
+                                    <span style="display: block; font-size: 13px; color: var(--text-dark); background: rgba(46, 204, 113, 0.1); padding: 8px; border-radius: 6px;">
+                                        <i class="fas fa-reply" style="font-size: 10px; margin-right: 5px;"></i> @item.Response
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--text-gray); font-style: italic; font-size: 12px;">@Localizer["NoResponseYet"]</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <button type="button" class="action-btn" onclick="openEditModal(@item.Id)" style="color: var(--primary); background: none; border: none; cursor: pointer;">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="action-btn" onclick="deleteComplaint(@item.Id)" style="color: #D93025; background: none; border: none; cursor: pointer;">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                    @if (item.Status == "Resolved")
+                                    {
+                                        <button type="button" class="action-btn" onclick="deleteComplaint(@item.Id)" style="color: #D93025; background: none; border: none; cursor: pointer;">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+
+
+<script>
+    function deleteComplaint(id) {
+        Swal.fire({
+            title: '@Localizer["AreYouSure"]',
+            text: '@Localizer["DeleteComplaintWarning"]',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '@Localizer["Delete"]',
+            cancelButtonText: '@Localizer["Cancel"]'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/StudentPortal/DeleteComplaint/' + id,
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('@Localizer["Deleted"]', response.message, 'success').then(() => location.reload());
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function openEditModal(id) {
+        console.log("Opening edit modal for ID:", id);
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-title').value = document.getElementById('title-' + id).innerText.trim();
+        document.getElementById('edit-description').value = document.getElementById('desc-' + id).innerText.trim();
+        
+        const catElem = document.getElementById('cat-' + id);
+        document.getElementById('edit-category').value = catElem.dataset.category || catElem.innerText.trim();
+        
+        const priorityElem = document.getElementById('priority-' + id);
+        document.getElementById('edit-priority').value = priorityElem.dataset.priority;
+
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    function saveEdit() {
+        const id = $('#edit-id').val();
+        const formData = $('#editForm').serialize();
+
+        console.log("Saving edit for ID:", id);
+        console.log("Serialized data:", formData);
+        
+        $.ajax({
+            url: '/StudentPortal/EditComplaint/' + id,
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                console.log("Edit response received:", response);
+                if (response.success) {
+                    Swal.fire({
+                        title: '@Localizer["Success"]',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Edit request failed detail:", {
+                    status: status,
+                    error: error,
+                    statusCode: xhr.status,
+                    response: xhr.responseText
+                });
+                Swal.fire('Error', 'Request failed (Status ' + xhr.status + '). Check console for details.', 'error');
+            }
+        });
+    }
+</script>
+
+<!-- New Complaint Form -->
+<div id="complaintForm" class="content-card">
+    <h3 class="card-title" style="margin-bottom: 20px;">@Localizer["SubmitNewComplaint"]</h3>
+    <form asp-action="SubmitComplaint" method="post">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SubjectTitle"] *</label>
+                <input type="text" name="title" class="form-input" placeholder="@Localizer["IssuePlaceholder"]" required>
+            </div>
+            
+            <div>
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Category"] *</label>
+                <select name="category" class="form-input" required>
+                    <option value="">@Localizer["SelectCategory"]</option>
+                    <option value="Academic">@Localizer["Academic"]</option>
+                    <option value="Administrative">@Localizer["Administrative"]</option>
+                    <option value="Facilities">@Localizer["Facilities"]</option>
+                    <option value="Services">@Localizer["Services"]</option>
+                    <option value="Other">@Localizer["Other"]</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["PriorityLabel"] *</label>
+                <select name="priority" class="form-input" required>
+                    <option value="Low">@Localizer["Low"]</option>
+                    <option value="Normal" selected>@Localizer["Normal"]</option>
+                    <option value="High">@Localizer["High"]</option>
+                    <option value="Urgent">@Localizer["Urgent"]</option>
+                </select>
+            </div>
+            
+            <div style="grid-column: 1 / -1;">
+                <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Description"] *</label>
+                <textarea name="description" class="form-input" rows="5" placeholder="@Localizer["DescribeIssuePlaceholder"]" required></textarea>
+            </div>
+        </div>
+        
+
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button type="submit" class="form-btn">@Localizer["SubmitComplaint"]</button>
+        </div>
+    </form>
+</div>
+
+<!-- Edit Complaint Modal -->
+<div id="editModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div class="content-card" style="width: 90%; max-width: 600px; margin: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 class="card-title" style="margin:0;">@Localizer["EditComplaint"]</h3>
+            <button onclick="closeEditModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-gray);">&times;</button>
+        </div>
+        <form id="editForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="edit-id" name="id">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["SubjectTitle"] *</label>
+                    <input type="text" id="edit-title" name="title" class="form-input" required>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Category"] *</label>
+                    <select id="edit-category" name="category" class="form-input" required>
+                        <option value="Academic">@Localizer["Academic"]</option>
+                        <option value="Administrative">@Localizer["Administrative"]</option>
+                        <option value="Facilities">@Localizer["Facilities"]</option>
+                        <option value="Services">@Localizer["Services"]</option>
+                        <option value="Other">@Localizer["Other"]</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["PriorityLabel"] *</label>
+                    <select id="edit-priority" name="priority" class="form-input" required>
+                        <option value="Low">@Localizer["Low"]</option>
+                        <option value="Normal">@Localizer["Normal"]</option>
+                        <option value="High">@Localizer["High"]</option>
+                        <option value="Urgent">@Localizer["Urgent"]</option>
+                    </select>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; display: block;">@Localizer["Description"] *</label>
+                    <textarea id="edit-description" name="description" class="form-input" rows="5" required></textarea>
+                </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeEditModal()" class="form-btn" style="background:#eee; color:#333;">@Localizer["Cancel"]</button>
+                <button type="button" onclick="saveEdit()" class="form-btn">@Localizer["SaveChanges"]</button>
+            </div>
+        </form>
+    </div>
+</div>

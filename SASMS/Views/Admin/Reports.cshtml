@@ -1,0 +1,548 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@{
+    ViewData["Title"] = Localizer["Reports"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    // Safely cast ViewBag data
+    var attendanceStats = ViewBag.AttendanceStats;
+    var attendanceTrend = ViewBag.AttendanceTrend as IEnumerable<dynamic> ?? new List<dynamic>();
+    var deptDistribution = ViewBag.DeptDistribution as IEnumerable<dynamic> ?? new List<dynamic>();
+    
+    var admissionsStatusData = ViewBag.AdmissionsStatusData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var admissionsDeptData = ViewBag.AdmissionsDeptData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var admissionsEligibilityData = ViewBag.AdmissionsEligibilityData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var admissionStats = ViewBag.AdmissionStats;
+
+    var studentStatusData = ViewBag.StudentStatusData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var complaintsCategoryData = ViewBag.ComplaintsCategoryData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var complaintsData = ViewBag.ComplaintsData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var activitiesData = ViewBag.ActivitiesData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var activitiesCategoryData = ViewBag.ActivitiesCategoryData as IEnumerable<dynamic> ?? new List<dynamic>();
+    var feeSubmissionStats = ViewBag.FeeSubmissionStats;
+    var feeStatusDetails = ViewBag.FeeStatusDetails as IEnumerable<dynamic> ?? new List<dynamic>();
+    var classAttendanceComparison = ViewBag.ClassAttendanceComparison as IEnumerable<dynamic> ?? new List<dynamic>();
+
+    var selectedClass = ViewBag.SelectedClass as string;
+    var classes = ViewBag.Classes as List<string>;
+
+
+    Func<dynamic, string, object> getVal = (obj, prop) => obj?.GetType().GetProperty(prop)?.GetValue(obj, null) ?? 0;
+    Func<dynamic, string, string> getStr = (obj, prop) => obj?.GetType().GetProperty(prop)?.GetValue(obj, null)?.ToString() ?? "";
+}
+
+<style>
+    .report-tabs {
+        display: flex; gap: 8px; margin-bottom: 24px; padding-bottom: 8px;
+        overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+    }
+    .report-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+        padding: 12px 24px; border: none; background: white;
+        color: var(--text-gray); font-weight: 600; cursor: pointer;
+        border-radius: 12px; transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn i { font-size: 16px; }
+    .tab-btn:hover { background: #F8F9FA; color: var(--primary); transform: translateY(-2px); }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(77, 68, 181, 0.3); }
+    
+    .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+    .tab-content.active { display: block; }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px; margin-bottom: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 24px; }
+    
+    .metric-card {
+        background: white; padding: 24px; border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left;
+        display: flex; align-items: center; gap: 20px; transition: transform 0.3s;
+    }
+    .metric-card:hover { transform: translateY(-5px); }
+    .metric-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .metric-value { font-size: 28px; font-weight: 700; color: var(--text-dark); }
+    .metric-label { font-size: 14px; color: var(--text-gray); font-weight: 500; }
+    
+    .chart-card {
+        background: white; padding: 24px; border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+    }
+    .chart-header { margin-bottom: 20px; border-bottom: 1px solid #F0F0F0; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .chart-title { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+    
+    .filter-dropdown {
+        padding: 8px 16px; border-radius: 10px; border: 1px solid #E0E0E0;
+        background: white; color: var(--text-dark); font-weight: 600; cursor: pointer;
+    }
+
+    [dir="rtl"] .metric-card { text-align: right; }
+    [dir="rtl"] .report-tabs { flex-direction: row; }
+
+    /* Dark Mode Overrides */
+    body.dark-mode .metric-card, 
+    body.dark-mode .chart-card,
+    body.dark-mode .tab-btn,
+    body.dark-mode .filter-dropdown { background: #1E1E1E; color: #E0E0E0; border: 1px solid #333; }
+    body.dark-mode .metric-value { color: #FFF; }
+    body.dark-mode .tab-btn:hover { background: #252525; }
+</style>
+
+<div id="report-page">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h2 class="page-title" style="margin-bottom: 5px;">@Localizer["ReportsAndAnalytics"] @(string.IsNullOrEmpty(selectedClass) ? "" : $" - {selectedClass}")</h2>
+            <p style="color: var(--text-gray); font-size: 14px;">@Localizer["ReportsDesc"]</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          
+            <button class="action-btn" onclick="exportReport()" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600;">
+                <i class="fas fa-file-pdf"></i> @Localizer["ExportAll"]
+            </button>
+        </div>
+    </div>
+
+    <div class="report-tabs">
+        <button class="tab-btn active" onclick="showTab('admissions')"><i class="fas fa-user-plus"></i> @Localizer["Admissions"]</button>
+        <button class="tab-btn" onclick="showTab('students')"><i class="fas fa-user-graduate"></i> @Localizer["Students"]</button>
+        <button class="tab-btn" onclick="showTab('attendance')"><i class="fas fa-clipboard-user"></i> @Localizer["Attendance"]</button>
+        <button class="tab-btn" onclick="showTab('fees')"><i class="fas fa-wallet"></i> @Localizer["Fees"]</button>
+        <button class="tab-btn" onclick="showTab('complaints')"><i class="fas fa-circle-exclamation"></i> @Localizer["Complaints"]</button>
+        <button class="tab-btn" onclick="showTab('activities')"><i class="fas fa-basketball-ball"></i> @Localizer["Activities"]</button>
+    </div>
+
+    <div id="report-content">
+
+         <div id="admissions" class="tab-content active">
+            <div class="grid-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(77, 68, 181, 0.1); color: var(--primary);"><i class="fas fa-file-signature"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["TotalApplications"]</div>
+                        <div class="metric-value">@getVal(admissionStats, "Total")</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50;"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["EligibleApplicants"]</div>
+                        <div class="metric-value">@getVal(admissionStats, "Eligible")</div>
+                    </div>
+                </div>
+                <div class="metric-card" style="background: #FFEAEA;">
+                    <div class="metric-icon" style="background: rgba(255, 77, 77, 0.1); color: #FF4D4D;"><i class="fas fa-user-xmark"></i></div>
+                    <div>
+                        <div class="metric-label" style="color: #FF4D4D;">@Localizer["NonEligible"]</div>
+                        <div class="metric-value" style="color: #FF4D4D;">@getVal(admissionStats, "NotEligible")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["ApplicationStatus"]</h3></div>
+                    <div style="height: 380px;"><canvas id="admissionStatusChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["DepartmentApplications"]</h3></div>
+                    <div style="height: 380px;"><canvas id="deptApplicationChart"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-card" style="margin-top: 24px; max-width: 600px;">
+                <div class="chart-header"><h3 class="chart-title">@Localizer["EligibilityBreakdown"]</h3></div>
+                <div style="height: 300px;"><canvas id="eligibilityChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <div class="grid-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(77, 68, 181, 0.1); color: var(--primary);"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["TotalStudents"]</div>
+                        <div class="metric-value">@deptDistribution.Sum(d => (int)getVal(d, "Count"))</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50;"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["ActiveStudents"]</div>
+                        <div class="metric-value">@(studentStatusData.FirstOrDefault(s => getStr(s, "Status") == "Active")?.GetType().GetProperty("Count")?.GetValue(studentStatusData.FirstOrDefault(s => getStr(s, "Status") == "Active"), null) ?? 0)</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(33, 150, 243, 0.1); color: #2196F3;"><i class="fas fa-graduation-cap"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["Graduated"]</div>
+                        <div class="metric-value">@(studentStatusData.FirstOrDefault(s => getStr(s, "Status") == "Graduated")?.GetType().GetProperty("Count")?.GetValue(studentStatusData.FirstOrDefault(s => getStr(s, "Status") == "Graduated"), null) ?? 0)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["StudentStatusBreakdown"]</h3></div>
+                    <div style="height: 320px;"><canvas id="statusChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["DistributionByDepartment"]</h3></div>
+                    <div style="height: 320px;"><canvas id="studentDeptChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="tab-content">
+            <div class="grid-2">
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["OverallAttendance"]</h3></div>
+                    <div style="height: 300px;"><canvas id="attendanceDonutChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">@Localizer["AttendanceTrend"]</h3>
+                        <span style="font-size: 12px; color: var(--text-gray);">@Localizer["Last30Days"]</span>
+                    </div>
+                    <div style="height: 300px;"><canvas id="attendanceTrendChart"></canvas></div>
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(selectedClass))
+            {
+                <div class="chart-card" style="margin-top: 24px;">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["ClassAttendanceComparison"]</h3></div>
+                    <div style="height: 350px;"><canvas id="classComparisonChart"></canvas></div>
+                </div>
+            }
+        </div>
+
+        <!-- Fees Tab -->
+        <div id="fees" class="tab-content">
+            <div class="grid-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50;"><i class="fas fa-check-double"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["Submitted"]</div>
+                        <div class="metric-value">@getVal(feeSubmissionStats, "Submitted")</div>
+                    </div>
+                </div>
+                <div class="metric-card" style="background: #FFEAEA;">
+                    <div class="metric-icon" style="background: rgba(255, 77, 77, 0.1); color: #FF4D4D;"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="metric-label" style="color: #FF4D4D;">@Localizer["RemainingStudents"]</div>
+                        <div class="metric-value" style="color: #FF4D4D;">@getVal(feeSubmissionStats, "Remaining")</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(252, 196, 62, 0.1); color: #FCC43E;"><i class="fas fa-calculator"></i></div>
+                    <div>
+                        <div class="metric-label">@Localizer["SubmissionRate"]</div>
+                        @{
+                            var totalStudentsData = (int)getVal(feeSubmissionStats, "Total");
+                            var subStudentsVal = (int)getVal(feeSubmissionStats, "Submitted");
+                            var subRateVal = totalStudentsData > 0 ? (double)subStudentsVal / totalStudentsData * 100 : 0;
+                        }
+                        <div class="metric-value">@subRateVal.ToString("F1")%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["FeeCollectionStatus"]</h3></div>
+                    <div style="height: 380px;"><canvas id="feeStatusDetailsChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["FeeSubmissionOverview"]</h3></div>
+                    <div style="height: 380px;"><canvas id="feeStatusSummaryChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complaints Tab -->
+        <div id="complaints" class="tab-content">
+            <div class="grid-2">
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["ComplaintStatus"]</h3></div>
+                    <div style="height: 380px;"><canvas id="complaintStatusChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["ComplaintCategories"]</h3></div>
+                    <div style="height: 380px;"><canvas id="complaintCategoryChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div id="activities" class="tab-content">
+            <div class="grid-2">
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["ActivityCategories"]</h3></div>
+                    <div style="height: 380px;"><canvas id="activityCategoryChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3 class="chart-title">@Localizer["ParticipationPerActivity"]</h3></div>
+                    <div style="height: 380px;"><canvas id="activityParticipationChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function filterByClass(className) {
+            window.location.href = '@Url.Action("Reports", "Admin")?className=' + className;
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (btn) btn.classList.add('active');
+            
+            const content = document.getElementById(tabId);
+            if (content) content.classList.add('active');
+        }
+
+        function exportReport() {
+            const element = document.getElementById('report-content');
+            const opt = {
+                margin: 5,
+                filename: 'SASMS_Detailed_Report_' + new Date().toISOString().split('T')[0] + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1.5, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(t => t.style.display = 'block');
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                tabs.forEach(t => t.style.display = '');
+                showTab('admissions');
+            });
+        }
+
+        Chart.defaults.font.family = "'Poppins', sans-serif";
+        Chart.defaults.color = '#718096';
+
+        // --- Charts Initialization ---
+        
+        // 1. Admission Status
+        new Chart(document.getElementById('admissionStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: @Json.Serialize(admissionsStatusData.Select(x => getStr(x, "Status"))),
+                datasets: [{
+                    data: @Json.Serialize(admissionsStatusData.Select(x => getVal(x, "Count"))),
+                    backgroundColor: ['#FCC43E', '#4CAF50', '#F44336', '#2196F3', '#9E9E9E']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 1.1 Dept Applications
+        new Chart(document.getElementById('deptApplicationChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(admissionsDeptData.Select(x => getStr(x, "Department"))),
+                datasets: [{
+                    label: '@Localizer["Applications"]',
+                    data: @Json.Serialize(admissionsDeptData.Select(x => getVal(x, "Count"))),
+                    backgroundColor: '#4D44B5',
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 1.2 Eligibility
+        new Chart(document.getElementById('eligibilityChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['@Localizer["Eligible"]', '@Localizer["NotEligible"]'],
+                datasets: [{
+                    data: [@(admissionsEligibilityData.FirstOrDefault(x => (bool)getVal(x, "IsEligible") == true)?.GetType().GetProperty("Count")?.GetValue(admissionsEligibilityData.FirstOrDefault(x => (bool)getVal(x, "IsEligible") == true), null) ?? 0), @(admissionsEligibilityData.FirstOrDefault(x => (bool)getVal(x, "IsEligible") == false)?.GetType().GetProperty("Count")?.GetValue(admissionsEligibilityData.FirstOrDefault(x => (bool)getVal(x, "IsEligible") == false), null) ?? 0)],
+                    backgroundColor: ['#4CAF50', '#F44336']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 2. Student Status
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @Json.Serialize(studentStatusData.Select(x => getStr(x, "Status"))),
+                datasets: [{
+                    data: @Json.Serialize(studentStatusData.Select(x => getVal(x, "Count"))),
+                    backgroundColor: ['#4CAF50', '#FCC43E', '#F44336', '#2196F3', '#9E9E9E']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 3. Student Dept
+        new Chart(document.getElementById('studentDeptChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(deptDistribution.Select(x => getStr(x, "Department"))),
+                datasets: [{
+                    label: '@Localizer["StudentsPerDept"]',
+                    data: @Json.Serialize(deptDistribution.Select(x => getVal(x, "Count"))),
+                    backgroundColor: '#FCC43E',
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+        });
+
+        // 4. Attendance Donut
+        new Chart(document.getElementById('attendanceDonutChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['@Localizer["Present"]', '@Localizer["Absent"]', '@Localizer["Late"]'],
+                datasets: [{
+                    data: [@(getVal(attendanceStats, "Present")), @(getVal(attendanceStats, "Absent")), @(getVal(attendanceStats, "Late"))],
+                    backgroundColor: ['#4CAF50', '#F44336', '#FCC43E']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 5. Attendance Trend
+        new Chart(document.getElementById('attendanceTrendChart'), {
+            type: 'line',
+            data: {
+                labels: @Json.Serialize(attendanceTrend.Select(x => ((DateTime)getVal(x, "Date")).ToString("MM/dd"))),
+                datasets: [{
+                    label: '@Localizer["AttendanceRate"] %',
+                    data: @Json.Serialize(attendanceTrend.Select(x => (double)getVal(x, "Present") / Math.Max(1, (int)getVal(x, "Total")) * 100)),
+                    borderColor: '#4D44B5',
+                    backgroundColor: 'rgba(77, 68, 181, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
+        });
+
+        @if (string.IsNullOrEmpty(selectedClass))
+        {
+            <text>
+            // 6. Class Comparison
+            new Chart(document.getElementById('classComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: @Json.Serialize(classAttendanceComparison.Select(x => getStr(x, "ClassName"))),
+                    datasets: [{
+                        label: '@Localizer["PresentRate"] %',
+                        data: @Json.Serialize(classAttendanceComparison.Select(x => getVal(x, "PresentRate"))),
+                        backgroundColor: '#4CAF50',
+                        borderRadius: 8
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+            </text>
+        }
+
+        // 7. Fee Status Summary
+        new Chart(document.getElementById('feeStatusSummaryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['@Localizer["Submitted"]', '@Localizer["RemainingStudents"]'],
+                datasets: [{
+                    data: [@getVal(feeSubmissionStats, "Submitted"), @getVal(feeSubmissionStats, "Remaining")],
+                    backgroundColor: ['#4CAF50', '#FF4D4D']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 8. Fee Collection Status Details
+        new Chart(document.getElementById('feeStatusDetailsChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(feeStatusDetails.Select(x => getStr(x, "Status"))),
+                datasets: [{
+                    label: '@Localizer["Submissions"]',
+                    data: @Json.Serialize(feeStatusDetails.Select(x => getVal(x, "Count"))),
+                    backgroundColor: '#4D44B5',
+                    borderRadius: 8
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 9. Complaint Categories
+        new Chart(document.getElementById('complaintCategoryChart'), {
+            type: 'polarArea',
+            data: {
+                labels: @Json.Serialize(complaintsCategoryData.Select(x => getStr(x, "Category"))),
+                datasets: [{
+                    data: @Json.Serialize(complaintsCategoryData.Select(x => getVal(x, "Count"))),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 10. Activity Categories
+        new Chart(document.getElementById('activityCategoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @Json.Serialize(activitiesCategoryData.Select(x => getStr(x, "Category"))),
+                datasets: [{
+                    data: @Json.Serialize(activitiesCategoryData.Select(x => getVal(x, "Count"))),
+                    backgroundColor: ['#FF9800', '#00BCD4', '#E91E63', '#4CAF50', '#673AB7']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 10.1 Activity Participation
+        new Chart(document.getElementById('activityParticipationChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(activitiesData.Select(x => getStr(x, "Title"))),
+                datasets: [{
+                    label: '@Localizer["Participants"]',
+                    data: @Json.Serialize(activitiesData.Select(x => getVal(x, "Participants"))),
+                    backgroundColor: '#FCC43E',
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+        });
+
+        // 12. Complaint Status
+        new Chart(document.getElementById('complaintStatusChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(complaintsData.Select(x => getStr(x, "Status"))),
+                datasets: [{
+                    label: '@Localizer["Complaints"]',
+                    data: @Json.Serialize(complaintsData.Select(x => getVal(x, "Count"))),
+                    backgroundColor: '#FF6384',
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+    </script>
+}

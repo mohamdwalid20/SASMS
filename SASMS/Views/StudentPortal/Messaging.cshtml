@@ -1,0 +1,498 @@
+@model SASMS.ViewModels.MessagingViewModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResources> Localizer
+@using SASMS.Helpers
+
+@{
+    ViewData["Title"] = Localizer["Messages"];
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    var selectedUser = ViewBag.SelectedUser as SASMS.Models.User;
+    var currentUserId = (int)ViewBag.CurrentUserId;
+}
+
+<div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: calc(100vh - 120px); max-height: 800px;">
+    
+    <!-- Sidebar: User List -->
+    <div style="background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column;">
+        <div style="padding: 20px; border-bottom: 1px solid #F0F0F0;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--text-dark);">@Localizer["Messages"]</h3>
+            <div style="margin-top: 16px; position: relative;">
+                <i class="fas fa-search" style="color: #A098AE; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                <input type="text" placeholder="@Localizer["SearchPeople"]" style="width: 100%; padding: 10px 10px 10px 36px; border: 1px solid #F0F0F0; border-radius: 8px; outline: none; background: #FAFAFA;">
+            </div>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto;">
+            @foreach (var user in Model.Users)
+            {
+                <form asp-action="SelectChat" method="post" style="margin: 0;">
+                    <input type="hidden" name="userId" value="@user.Id" />
+                    <button type="submit" style="display: block; width: 100%; text-align: left; padding: 16px 20px; border: none; border-bottom: 1px solid #F8F9FF; transition: 0.2s; background: @(ViewBag.SelectedUserId == user.Id ? "#F3F4FF" : "white"); border-left: 4px solid @(ViewBag.SelectedUserId == user.Id ? "var(--primary)" : "transparent"); cursor: pointer;">
+                        <div style="display: flex; gap: 12px;">
+                            <div style="position: relative;">
+                                @if (!string.IsNullOrEmpty(user.ProfilePicturePath))
+                                {
+                                    <img src="@user.ProfilePicturePath" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                                        @(!string.IsNullOrEmpty(user.Name) ? user.Name.Substring(0, 1).ToUpper() : "U")
+                                    </div>
+                                }
+
+                                @if (user.UnreadCount > 0)
+                                {
+                                    <div style="position: absolute; top: -2px; right: -2px; background: #FF5252; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid white;">@user.UnreadCount</div>
+                                }
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                                    <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@user.Name</h4>
+                                    <span style="font-size: 11px; color: var(--text-gray);">@(user.LastMessageDate.HasValue ? user.LastMessageDate.Value.ToLocalTime().ToString("MMM dd") : "")</span>
+                                </div>
+                                <p style="margin: 0; font-size: 12px; color: var(--text-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @(string.IsNullOrEmpty(user.LastMessage) ? Localizer["StartConversation"] : user.LastMessage)
+                                </p>
+                            </div>
+                        </div>
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div style="background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column;">
+        @if (selectedUser != null)
+        {
+            <!-- Header -->
+            <div style="padding: 16px 24px; border-bottom: 1px solid #F0F0F0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    @if (!string.IsNullOrEmpty(selectedUser.ProfilePicturePath))
+                    {
+                        <img src="@selectedUser.ProfilePicturePath" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+                            @(!string.IsNullOrEmpty(selectedUser.Name) ? selectedUser.Name.Substring(0, 1).ToUpper() : "U")
+                        </div>
+                    }
+                    <div>
+                        <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text-dark);">@selectedUser.Name</h4>
+                        @{
+                            var isOnline = selectedUser.LastSeen.HasValue && selectedUser.LastSeen.Value > DateTime.UtcNow.AddMinutes(-5);
+                        }
+                        @if (isOnline)
+                        {
+                            <span style="font-size: 12px; color: #4CAF50; font-weight: 500;">@Localizer["Online"]</span>
+                        }
+                        else
+                        {
+                            <span style="font-size: 12px; color: #A098AE; font-weight: 500;">@Localizer["Offline"]</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages List -->
+            <div class="chat-messages" style="flex: 1; padding: 24px; overflow-y: auto; background: #F8F9FF; display: flex; flex-direction: column; gap: 16px;">
+                @foreach (var msg in Model.CurrentConversation)
+                {
+                    bool isMe = msg.SenderId == currentUserId;
+                    <div style="display: flex; justify-content: @(isMe ? "flex-end" : "flex-start");">
+                        <div style="max-width: 70%; @(isMe ? "background: var(--primary); color: white; border-radius: 12px 12px 0 12px;" : "background: white; color: var(--text-dark); border-radius: 12px 12px 12px 0; border: 1px solid #F0F0F0;") padding: 12px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            
+                            @if (msg.Latitude.HasValue && msg.Longitude.HasValue)
+                            {
+                                <div style="margin-bottom: 8px;">
+                                    <a href="https://www.google.com/maps?q=@msg.Latitude,@msg.Longitude" target="_blank" style="color: @(isMe ? "white" : "var(--primary)"); text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                                        <i class="fas fa-map-marker-alt"></i> @Localizer["ViewLocation"]
+                                    </a>
+                                </div>
+                            }
+
+                            @if (msg.Attachments != null && msg.Attachments.Any())
+                            {
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                                    @foreach (var att in msg.Attachments)
+                                    {
+                                        if (att.ContentType.StartsWith("image/"))
+                                        {
+                                            <a href="@att.FilePath" target="_blank">
+                                                <img src="@att.FilePath" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2);">
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@att.FilePath" target="_blank" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 8px; text-decoration: none; color: @(isMe ? "white" : "inherit"); font-size: 12px;">
+                                                <i class="fas fa-file"></i> @att.FileName
+                                            </a>
+                                        }
+                                    }
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(msg.VoiceMessagePath))
+                            {
+                                <div style="margin-bottom: 8px; width: 240px;">
+                                    <audio controls style="width: 100%; border-radius: 20px; height: 40px;">
+                                        <source src="@msg.VoiceMessagePath" type="audio/webm">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    @if(msg.VoiceMessageDuration.HasValue)
+                                    {
+                                        <div style="font-size: 10px; margin-top: 4px; opacity: 0.7; display: flex; align-items: center; gap: 4px;">
+                                            <i class="fas fa-clock"></i> @TimeSpan.FromSeconds(msg.VoiceMessageDuration.Value).ToString(@"mm\:ss")
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(msg.Content) && msg.Content != "[Location Shared]" && msg.Content != "[Attachment]" && msg.Content != "[Voice Message]")
+                            {
+                                <p style="margin: 0; font-size: 14px; line-height: 1.5;">@msg.Content</p>
+                            }
+                            <span style="display: block; text-align: right; font-size: 10px; margin-top: 4px; opacity: 0.8;">@msg.SentAt.ToLocalTime().ToString("hh:mm tt")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Input Area -->
+            <div style="padding: 20px 24px; border-top: 1px solid #F0F0F0;">
+                
+                <!-- Recording UI Overlay -->
+                <div id="recordingUI" style="display: none; align-items: center; gap: 12px; background: #FFF0F0; padding: 12px; border-radius: 12px; border: 1px solid #FFCDCD; margin-bottom: 12px;">
+                    <div style="width: 12px; height: 12px; background: #FF5252; border-radius: 50%; box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); animation: pulse-red 2s infinite;"></div>
+                    <span id="recordingTimer" style="font-family: monospace; font-weight: 600; color: #FF5252;">00:00</span>
+                    <span style="flex: 1; font-size: 13px; color: var(--text-gray);">@Localizer["RecordingVoiceMessage"]...</span>
+                    
+                    <button type="button" onclick="cancelRecording()" style="background: white; border: 1px solid #E0E0E0; color: var(--text-gray); width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" title="@Localizer["Cancel"]">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button type="button" onclick="stopAndSendRecording()" style="background: #FF5252; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" title="@Localizer["Send"]">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+
+                <form id="chatForm" asp-action="SendMessage" method="post" enctype="multipart/form-data" style="display: flex; gap: 12px; align-items: center;">
+                    <input type="hidden" name="receiverId" value="@selectedUser.Id">
+                    <input type="hidden" name="latitude" id="latInput">
+                    <input type="hidden" name="longitude" id="lngInput">
+                    <input type="hidden" name="voiceDuration" id="voiceDurationInput">
+                    
+                    <button type="button" class="icon-btn" onclick="document.getElementById('fileInput').click()" title="@Localizer["AttachFiles"]">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="fileInput" name="attachments" multiple style="display: none;" onchange="updateFileCount()">
+                    
+                    <button type="button" class="icon-btn" id="micBtn" onclick="startRecording()" title="@Localizer["RecordVoiceMessage"]">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <!-- Hidden input for voice message blob -->
+                    <input type="file" id="voiceMessageInput" name="voiceMessage" style="display: none;" accept="audio/*">
+
+                    <button type="button" class="icon-btn" onclick="shareLocation()" title="@Localizer["ShareLocation"]">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+
+                    <div style="position: relative; flex: 1;">
+                        <input type="text" name="content" id="messageContent" placeholder="@Localizer["TypeMessage"]" style="width: 100%; padding: 12px 16px; border: 1px solid #F0F0F0; border-radius: 24px; outline: none; background: #FAFAFA;">
+                        <button type="button" onclick="toggleEmojiPicker()" id="emojiBtn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #A098AE;">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <div id="emojiPickerContainer" style="display: none; position: absolute; bottom: 100%; right: 0; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+                            <emoji-picker class="light"></emoji-picker>
+                        </div>
+                    </div>
+
+                    <button type="submit" style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+                <div id="statusMessage" style="font-size: 11px; color: var(--primary); margin-top: 4px; display: none; align-items: center; gap: 8px;">
+                    <i class="fas fa-circle-notch fa-spin"></i> <span id="statusText"></span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #A098AE;">
+                <i class="far fa-comments" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>@Localizer["SelectConversation"]</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #F0F0F0;
+        background: white;
+        color: #A098AE;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .icon-btn:hover {
+        background: #F8F9FF;
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    emoji-picker {
+        --num-columns: 8;
+        --category-emoji-size: 1.25rem;
+        width: 350px;
+        height: 400px;
+    }
+    
+    @@keyframes pulse-red {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 82, 82, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
+    }
+</style>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@@^1/index.js"></script>
+<script>
+    // Auto-scroll to bottom of chat
+    var chatContainer = document.querySelector('.chat-messages');
+    if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Constants
+    const maxDuration = 120; // 2 minutes
+    let mediaRecorder;
+    let audioChunks = [];
+    let recordingStartTime;
+    let recordingTimerInterval;
+
+    function showStatus(text, isError = false) {
+        const container = document.getElementById('statusMessage');
+        const statusText = document.getElementById('statusText');
+        statusText.textContent = text;
+        container.style.color = isError ? '#FF5252' : 'var(--primary)';
+        container.querySelector('i').className = isError ? 'fas fa-exclamation-circle' : 'fas fa-circle-notch fa-spin';
+        container.style.display = 'flex';
+    }
+
+    function updateFileCount() {
+        const input = document.getElementById('fileInput');
+        if (input.files.length > 0) {
+            showStatus(input.files.length + " @Localizer["FilesSelected"]");
+        } else {
+            document.getElementById('statusMessage').style.display = 'none';
+        }
+    }
+
+    function shareLocation() {
+        if ("geolocation" in navigator) {
+            showStatus("@Localizer["Locating"]...");
+            
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('latInput').value = position.coords.latitude;
+                document.getElementById('lngInput').value = position.coords.longitude;
+                showStatus("@Localizer["LocationFound"]! @Localizer["Sending"]...");
+                document.getElementById('chatForm').submit();
+            }, function(error) {
+                console.error("Geolocation error:", error);
+                let msg = "@Localizer["LocationError"]";
+                if (error.code === 1) {
+                    msg = "@Localizer["LocationDenied"]";
+                    // Fallback to text status instead of alert
+                }
+                else if (error.code === 3) msg = "@Localizer["LocationTimeout"]";
+                showStatus(msg, true);
+            }, options);
+        } else {
+            showStatus("@Localizer["LocationNotSupported"]", true);
+        }
+    }
+
+    function toggleEmojiPicker() {
+        const picker = document.getElementById('emojiPickerContainer');
+        picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Initialize emoji picker for the dynamic element
+    document.querySelector('emoji-picker').addEventListener('emoji-click', event => {
+        const input = document.getElementById('messageContent');
+        input.value += event.detail.unicode;
+        input.focus();
+    });
+
+    // Close picker when clicking outside
+    document.addEventListener('click', function(event) {
+        const picker = document.getElementById('emojiPickerContainer');
+        const emojiBtn = document.getElementById('emojiBtn');
+        if (picker && !picker.contains(event.target) && !emojiBtn.contains(event.target)) {
+            picker.style.display = 'none';
+        }
+    });
+
+    // Handle form submission to clear status if needed
+    document.getElementById('chatForm').onsubmit = function() {
+        showStatus("@Localizer["Sending"]...");
+    };
+
+    async function startRecording() {
+        console.log("Microphone button clicked");
+
+        // 1. Check if running on HTTP (except localhost)
+        if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Secure Connection Required',
+                text: 'Voice recording requires a secure connection (HTTPS). Please switch to HTTPS.'
+            });
+            return;
+        }
+
+        // 2. Check Browser Support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.error("navigator.mediaDevices not supported");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Not Supported',
+                text: "@Localizer["AudioNotSupported"]"
+            });
+            return;
+        }
+
+        // 3. Check Permission State (if supported)
+        if (navigator.permissions && navigator.permissions.query) {
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+                console.log("Permission state:", permissionStatus.state);
+                if (permissionStatus.state === 'denied') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Microphone Blocked',
+                        html: "⚠️ Microphone is BLOCKED by the browser.<br><br>To fix this:<br>1. Click the Lock icon 🔒 next to the URL.<br>2. Find 'Microphone' and set it to 'Allow'.<br>3. Refresh the page."
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.warn("Permission query failed:", e);
+            }
+        }
+
+        try {
+            console.log("Requesting getUserMedia...");
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log("Stream obtained");
+            
+            mediaRecorder = new MediaRecorder(stream);
+            
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            audioChunks = [];
+            
+            document.getElementById('chatForm').style.display = 'none';
+            document.getElementById('recordingUI').style.display = 'flex';
+            
+            recordingStartTime = Date.now();
+            updateTimer();
+            recordingTimerInterval = setInterval(updateTimer, 1000);
+
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            let msg = "@Localizer["MicrophoneAccessDenied"]";
+            
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                 Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: "⚠️ Microphone access denied.\n\nPlease allow microphone access in your browser settings (Lock icon 🔒 in address bar)."
+                });
+            } else if (err.name === 'NotFoundError') {
+                 Swal.fire({
+                    icon: 'error',
+                    title: 'No Microphone',
+                    text: "No microphone found on this device."
+                });
+            } else {
+                 Swal.fire({
+                    icon: 'error',
+                    title: 'Microphone Error',
+                    text: "Microphone Error: " + err.message
+                });
+            }
+        }
+    }
+
+    function updateTimer() {
+        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        document.getElementById('recordingTimer').textContent = `${minutes}:${seconds}`;
+
+        if (elapsed >= maxDuration) {
+            stopAndSendRecording();
+        }
+    }
+
+    function cancelRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        clearInterval(recordingTimerInterval);
+        resetRecordingUI();
+    }
+
+    function stopAndSendRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            // Wait a brief moment for onstop to fire and blob to be created
+            setTimeout(processRecording, 200);
+        }
+        clearInterval(recordingTimerInterval);
+    }
+
+    function processRecording() {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const file = new File([audioBlob], "voice_" + Date.now() + ".webm", { type: 'audio/webm' });
+        
+        // Use DataTransfer to simulate file input selection
+        const container = new DataTransfer();
+        container.items.add(file);
+        document.getElementById('voiceMessageInput').files = container.files;
+        
+        // Set duration
+        const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+        document.getElementById('voiceDurationInput').value = duration > 0 ? duration : 1;
+
+        // Reset UI and Submit
+        resetRecordingUI();
+        showStatus("@Localizer["SendingVoiceMessage"]...");
+        document.getElementById('chatForm').submit();
+    }
+
+    function resetRecordingUI() {
+        document.getElementById('recordingUI').style.display = 'none';
+        document.getElementById('chatForm').style.display = 'flex';
+        document.getElementById('recordingTimer').textContent = "00:00";
+    }
+</script>
